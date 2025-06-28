@@ -16,6 +16,9 @@ import Wrapper from "../notes/wrapper";
 import { BaseTextEditorProps, BaseTextEditorRef } from "./base-text-editor";
 import { DebouncedFunc } from "lodash";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
+import { useShareNote } from "@/hooks/use-share-note";
 
 interface BaseSideDrawerProps {
   currentNote: Tables<"note"> | null;
@@ -44,6 +47,8 @@ export function BaseSideDrawer({
   });
 
   const [dialog, setDialog] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
+  const { isShareable, toggleShareable } = useShareNote();
 
   const date = new Date(currentNote?.created_at || "").toLocaleDateString("en-US", {
     year: "numeric",
@@ -105,14 +110,25 @@ export function BaseSideDrawer({
                   onKeyDown={handleKeyDown}
                   placeholder="New Note"
                 />
-                <DropdownMenu data-dropdown-menu>
+                <DropdownMenu data-dropdown-menu open={dropdown} onOpenChange={setDropdown}>
                   <DropdownMenuTrigger data-dropdown-menu>
                     <Wrapper data-dropdown-menu>
                       <Ellipsis size={20} className="text-slate-500" />
                     </Wrapper>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem variant="destructive" onClick={() => setDialog(true)} data-dropdown-menu>
+                    <DropdownMenuItem onClick={(e) => e.preventDefault()} data-dropdown-menu>
+                      <Switch id="shareable-swirch" checked={isShareable} onCheckedChange={() => toggleShareable(!isShareable)} />
+                      <Label htmlFor="view-mode">Public</Label>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => {
+                        setDropdown(false);
+                        setDialog(true);
+                      }}
+                      data-dropdown-menu
+                    >
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

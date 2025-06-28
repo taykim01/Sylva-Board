@@ -72,6 +72,7 @@ export type Database = {
           created_at: string
           creator_id: string | null
           id: string
+          shareable: boolean
           title: string
           x: number
           y: number
@@ -81,6 +82,7 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           id?: string
+          shareable?: boolean
           title: string
           x: number
           y: number
@@ -90,6 +92,7 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           id?: string
+          shareable?: boolean
           title?: string
           x?: number
           y?: number

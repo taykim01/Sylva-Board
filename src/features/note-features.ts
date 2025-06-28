@@ -18,6 +18,7 @@ export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>>
     content: "",
     x: 0,
     y: 0,
+    shareable: false,
   };
   const { data: createdNote, error: noteError } = await supabase.from("note").insert(newNote).select("*").single();
   if (noteError) {
@@ -78,4 +79,19 @@ export async function handleDeleteNote(id: string): Promise<Response<Tables<"not
     throw new Error(noteError.message);
   }
   return { data: deletedNote as Tables<"note">, error: null };
+}
+
+export const handleToggleShareable = async (id: string, shareable: boolean): Promise<Response<Tables<"note">>> => {
+  const supabase = await createClient();
+  const { data: updatedNote, error: noteError } = await supabase
+    .from("note")
+    .update({ shareable })
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (noteError) {
+    console.error("Error toggling shareable:", noteError.message);
+    throw new Error(noteError.message);
+  }
+  return { data: updatedNote as Tables<"note">, error: null };
 }

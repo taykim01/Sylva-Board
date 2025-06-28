@@ -11,6 +11,8 @@ export function useClickOutside({ ref, redirectPath }: UseClickOutsideProps) {
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
+    if (target.tagName === "HTML") return;
+    if(target.id === "shareable-switch") return;
     if (target.closest("[data-note-node]")) return;
     if (target.closest("[data-dropdown-menu]")) return;
     if (target.closest("[data-slot='alert-dialog-content']") || target.closest("[data-slot='alert-dialog-overlay']"))
