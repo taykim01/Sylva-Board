@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogTitle,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
-import { ChevronsRight, Ellipsis, TrashIcon } from "lucide-react";
+import { ChevronsRight, Ellipsis } from "lucide-react";
 import { AlertDialogHeader, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Tables } from "@/database.types";
@@ -45,7 +44,6 @@ export function BaseSideDrawer({
   });
 
   const [dialog, setDialog] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
 
   const date = new Date(currentNote?.created_at || "").toLocaleDateString("en-US", {
     year: "numeric",
