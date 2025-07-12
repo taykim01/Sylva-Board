@@ -95,3 +95,17 @@ export const handleToggleShareable = async (id: string, shareable: boolean): Pro
   }
   return { data: updatedNote as Tables<"note">, error: null };
 }
+
+export const handleReadSingleNote = async (id: string): Promise<Response<Tables<"note">>> => {
+  if(!id) {
+    console.error("Note ID is required to read a single note.");
+    return { data: null, error: "Note ID is required"}
+  }
+  const supabase = await createClient();
+  const { data: note, error: noteError } = await supabase.from("note").select("*").eq("id", id).single();
+  if (noteError) {
+    console.error("Error reading single note:", noteError.message);
+    throw new Error(noteError.message);
+  }
+  return { data: note as Tables<"note">, error: null };
+}

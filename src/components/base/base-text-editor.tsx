@@ -26,8 +26,8 @@ import { DebouncedFunc } from "lodash";
 export interface BaseTextEditorProps {
   noteId: string;
   isSideDrawer?: boolean;
-  notes: Tables<"note">[];
-  debounceUpdate: DebouncedFunc<
+  notes?: Tables<"note">[];
+  debounceUpdate?: DebouncedFunc<
     (
       id: string,
       updates: Partial<{
@@ -37,6 +37,7 @@ export interface BaseTextEditorProps {
     ) => Promise<void>
   >;
   currentNote?: Tables<"note">;
+  readOnly?: boolean;
 }
 
 export interface BaseTextEditorRef {
@@ -48,8 +49,9 @@ export interface BaseTextEditorRef {
 }
 
 export const BaseTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props, ref) => {
-  const note = props.notes?.find((note) => note.id === props.noteId);
+  const note = props.notes? props.notes.find((note) => note.id === props.noteId) : props.currentNote || null;
   const editor = useEditor({
+    editable: !props.readOnly,
     immediatelyRender: false,
     extensions: [
       StarterKit,
@@ -85,7 +87,7 @@ export const BaseTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>
     content: note?.content,
     onUpdate: ({ editor }) => {
       const content = editor.getHTML();
-      props.debounceUpdate(props.noteId, { content });
+      props.debounceUpdate?.(props.noteId, { content });
     },
   });
 

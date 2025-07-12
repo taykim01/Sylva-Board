@@ -11,6 +11,10 @@ import { BaseTextEditor, BaseTextEditorProps, BaseTextEditorRef } from "@/compon
 import { forwardRef } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Tables } from "@/database.types";
+import { useShareNote } from "@/hooks/use-share-note";
+import Spinner from "@/components/common/spinner";
+import { NoteViewer } from "@/components/notes/note-viewer";
+import { useAuth } from "@/hooks/use-auth";
 const DashboardTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props, ref) => {
   return <BaseTextEditor {...props} ref={ref} />;
 });
@@ -34,7 +38,7 @@ function DashboardNote(props: { data: Tables<"note"> }) {
   );
 }
 
-export function DashboardContent({ userEmail }: { userEmail: string }) {
+export function DashboardContent() {
   const {
     notes,
     viewMode,
@@ -55,12 +59,31 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
     await createNote();
   };
 
+  const { noteStatus, loading } = useShareNote();
+  if (loading && noteStatus !== null)
+    return (
+      <BaseContainer
+      className="relative"
+      viewMode={viewMode as "board" | "list"}
+      onToggleViewMode={toggleViewMode}
+      accountName={"User"}
+      showSignOutButton={true}
+    >
+        <Spinner />
+      </BaseContainer>
+    );
+
+  const { user } = useAuth();
+
+  if (noteStatus === "public" && !loading)
+    return <NoteViewer currentNote={currentNote || null} textEditorComponent={DashboardTextEditor} />;
+
   return (
     <BaseContainer
       className="relative"
       viewMode={viewMode as "board" | "list"}
       onToggleViewMode={toggleViewMode}
-      accountName={userEmail}
+      accountName={user.email || "User"}
       showSignOutButton={true}
     >
       <BaseBoard

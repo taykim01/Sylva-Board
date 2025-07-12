@@ -4,6 +4,7 @@ import { useDashboardStore } from "@/core/states";
 import { handleGetEdges } from "@/features/edge-features";
 import { handleGetMyNotes } from "@/features/note-features";
 import { useEffect, useState } from "react";
+import { useShareNote } from "./use-share-note";
 
 export function useLoadData() {
   const [loading, setLoading] = useState(false);
@@ -37,10 +38,16 @@ export function useLoadData() {
     }
   };
 
+  const { noteStatus, loading: shareLoading } = useShareNote();
+  const readData = async () => {
+    if(noteStatus === "public" || shareLoading) return;
+    await readMyNotes();
+    await readEdges();
+  }
+
   useEffect(() => {
-    readEdges();
-    readMyNotes();
-  }, []);
+    readData()
+  }, [noteStatus, shareLoading]);
 
   return { loading, error, edges, notes };
 }

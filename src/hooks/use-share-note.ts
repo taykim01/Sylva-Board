@@ -1,16 +1,20 @@
 "use client";
 
 import { useDashboardStore } from "@/core/states";
-import { handleToggleShareable } from "@/features/note-features";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { handleGetUser } from "@/features/auth-features";
+import { handleReadSingleNote, handleToggleShareable } from "@/features/note-features";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+type NoteStatus = "mine" | "public" | "restricted" | null;
 
 export function useShareNote() {
   const { notes, _updateNote } = useDashboardStore();
   const searchParams = useSearchParams();
   const noteId = searchParams.get("note_id") as string;
   const currentNote = notes.find((note) => note.id === noteId);
+  const router = useRouter();
 
   const toggleShareable = async (toggle: boolean) => {
     if (!noteId) {
@@ -39,5 +43,39 @@ export function useShareNote() {
 
   const isShareable = currentNote?.shareable || false;
 
-  return { isShareable, toggleShareable };
+  const [loading, setLoading] = useState(true);
+  const [noteStatus, setNoteStatus] = useState<NoteStatus>(null);
+
+  const checkShareable = async (): Promise<NoteStatus> => {
+    setLoading(true);
+    if (!noteId) {
+      setLoading(false);
+      return null;
+    }
+    const { data: user } = await handleGetUser();
+    const { data } = await handleReadSingleNote(noteId);
+    if (data?.creator_id === user?.id) {
+      setLoading(false);
+      setNoteStatus("mine");
+      return "mine";
+    } else if (!user && noteId) {
+      setLoading(false);
+      const status = data?.shareable ? "public" : "restricted";
+      setNoteStatus(status);
+      return status;
+    }
+    setNoteStatus("restricted");
+    setLoading(false);
+    alert("This note is not public.");
+    router.push("/sign-in");
+    return "restricted";
+  };
+  // TODO: 여기에 권한 없는 노트에 접근했을 때 핸들링 안 된 에러 뜸
+  // TODO: public 노트에 접근했을 때 아무것도 안 뜸
+
+  useEffect(() => {
+    checkShareable();
+  }, [noteId]);
+
+  return { isShareable, toggleShareable, noteStatus, loading };
 }
