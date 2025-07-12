@@ -28,16 +28,16 @@ interface BaseSideDrawerProps {
 }
 
 const NOTE_COLORS = [
-  "#f8fafc", // muted white
-  "#fef6e4", // soft yellow
-  "#fde2e4", // soft red
-  "#e0e7ff", // soft blue
-  "#d1fae5", // soft green
-  "#fbcfe8", // soft pink
-  "#fcd5ce", // soft orange
-  "#e2e8f0", // soft gray
-  "#fef9c3", // soft gold
-  "#bae6fd", // soft sky
+  "#ffffff", // pure white
+  "#fffbea", // very light yellow
+  "#fff5f5", // very light red
+  "#f5f7ff", // very light blue
+  "#f3fff7", // very light green
+  "#fff5fa", // very light pink
+  "#fff7f0", // very light orange
+  "#f7fafd", // very light gray
+  "#fffde7", // very light gold
+  "#f0fbff", // very light sky
 ];
 function getContrastingColor(bg: string) {
   if (!bg) return '#222';
@@ -191,7 +191,7 @@ export function BaseSideDrawer({
                 {NOTE_COLORS.map((color) => (
                   <button
                     key={color}
-                    className={`w-6 h-6 rounded-full border-2 ${localColor === color ? "border-black" : "border-transparent"}`}
+                    className={`w-6 h-6 rounded-full border-2 transition-transform duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black hover:scale-110 hover:shadow-md ${localColor === color ? "border-black" : "border-transparent"}`}
                     style={{ backgroundColor: color }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -212,6 +212,7 @@ export function BaseSideDrawer({
               notes={notes}
               debounceUpdate={debounceUpdate}
               currentNote={currentNote}
+              color={localColor}
             />
           </div>
         </>

@@ -37,6 +37,7 @@ export interface BaseTextEditorProps {
     ) => Promise<void>
   >;
   currentNote?: Tables<"note">;
+  color?: string;
 }
 
 export interface BaseTextEditorRef {
@@ -116,7 +117,7 @@ export const BaseTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>
   }, [editor, props.isSideDrawer, props.currentNote]);
 
   return (
-    <div className="notion-style-editor h-full" data-dropdown-menu>
+    <div className="notion-style-editor h-full" data-dropdown-menu style={{ backgroundColor: props.color || '#f8fafc' }}>
       <EditorContent
         editor={editor}
         className="prose max-w-none focus:outline-none cursor-text h-full"
