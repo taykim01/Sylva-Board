@@ -71,9 +71,9 @@ export function useBaseNote(store: BaseNoteStore, operations: BaseNoteOperations
     }
   };
 
-  const editNoteContent = async (id: string, updates: Partial<{ title: string; content: string }>) => {
+  const editNoteContent = async (id: string, updates: Partial<Tables<"note">>) => {
     _updateNote(id, updates);
-    const debouncedUpdateNote = debounce(async (id: string, updates: Partial<{ title: string; content: string }>) => {
+    const debouncedUpdateNote = debounce(async (id: string, updates: Partial<Tables<"note">>) => {
       try {
         await updateNoteOp(id, updates);
       } catch (error) {
@@ -84,7 +84,7 @@ export function useBaseNote(store: BaseNoteStore, operations: BaseNoteOperations
   };
 
   const debounceUpdate = useRef(
-    debounce(async (id: string, updates: Partial<{ title: string; content: string }>) => {
+    debounce(async (id: string, updates: Partial<Tables<"note">>) => {
       _updateNote(id, updates);
       try {
         await updateNoteOp(id, updates);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Tables } from "@/database.types";
-import { ChangeEvent, useEffect, useState, useRef } from "react";
+import { ChangeEvent, useEffect, useState, useRef, useCallback } from "react";
 import { Ellipsis } from "lucide-react";
 import {
   DropdownMenu,
@@ -15,6 +15,19 @@ import { Position } from "@xyflow/react";
 import { DebouncedFunc } from "lodash";
 import { BaseTextEditorProps, BaseTextEditorRef } from "./base-text-editor";
 
+const NOTE_COLORS = [
+  "#ffffff", // white
+  "#fef08a", // yellow
+  "#fca5a5", // red
+  "#a5b4fc", // blue
+  "#6ee7b7", // green
+  "#f9a8d4", // pink
+  "#fdba74", // orange
+  "#cbd5e1", // gray
+  "#fcd34d", // gold
+  "#38bdf8", // sky
+];
+
 type BaseNoteProps = {
   note: Tables<"note">;
   handle?: boolean;
@@ -23,10 +36,7 @@ type BaseNoteProps = {
   debounceUpdate: DebouncedFunc<
     (
       id: string,
-      updates: Partial<{
-        title: string;
-        content: string;
-      }>,
+      updates: Partial<Tables<"note">>,
     ) => Promise<void>
   >;
   createEdge: (
@@ -76,13 +86,21 @@ export function BaseNote({
     }
   };
 
+  const handleColorChange = useCallback(
+    (color: string) => {
+      debounceUpdate(note.id, { color });
+    },
+    [note.id, debounceUpdate]
+  );
+
   return (
     <div
       data-note-node
       onClick={() => selectNote(note.id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="flex-shrink-0 w-full sm:w-[240px] h-[240px] bg-white border-t-4 border-slate-500 p-3 pb-4 cursor-pointer shadow relative"
+      className="flex-shrink-0 w-full sm:w-[240px] h-[240px] border-t-4 border-slate-500 p-3 pb-4 cursor-pointer shadow relative"
+      style={{ backgroundColor: note.color || "#ffffff" }}
     >
       {handle && <Handles note={note} isHovered={isHovered} createEdge={createEdge} />}
       <div className="flex flex-col gap-2 h-full">
@@ -103,6 +121,26 @@ export function BaseNote({
                 }}
               >
                 Delete
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs text-slate-500 mb-1">Change color</span>
+                  <div className="flex flex-wrap gap-1">
+                    {NOTE_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        className={`w-6 h-6 rounded-full border-2 ${note.color === color ? "border-black" : "border-transparent"}`}
+                        style={{ backgroundColor: color }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleColorChange(color);
+                        }}
+                        aria-label={`Set note color to ${color}`}
+                        type="button"
+                      />
+                    ))}
+                  </div>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

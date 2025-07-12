@@ -13,6 +13,7 @@ export async function handleDemoCreateEmptyNote(): Promise<Response<Tables<"note
     content: "",
     x: 0,
     y: 0,
+    color: "#ffffff",
   };
   const { data: createdNote, error: noteError } = await supabase.from("note").insert(newNote).select("*").single();
   if (noteError) {
@@ -42,6 +43,7 @@ export async function handleDemoUpdateNote(
     content: string;
     x: number;
     y: number;
+    color: string;
   }>,
 ): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();

@@ -82,6 +82,7 @@ export async function handleSignUp(
       content: "<p>Sylva is a note-taking app that allows you to create and manage notes.</p>",
       x: -450,
       y: -150,
+      color: "#ffffff",
     },
     {
       creator_id: userId,
@@ -89,6 +90,7 @@ export async function handleSignUp(
       content: "<p>Create a note by clicking the + button.</p>",
       x: -850,
       y: 270,
+      color: "#ffffff",
     },
     {
       creator_id: userId,
@@ -96,6 +98,7 @@ export async function handleSignUp(
       content: "<p>Use <strong><em><mark>markdown</mark></em></strong> to format your notes.</p>",
       x: -550,
       y: 270,
+      color: "#ffffff",
     },
     {
       creator_id: userId,
@@ -103,6 +106,7 @@ export async function handleSignUp(
       content: "<p>Connect two notes by dragging from one note...</p>",
       x: -100,
       y: 100,
+      color: "#ffffff",
     },
     {
       creator_id: userId,
@@ -110,6 +114,7 @@ export async function handleSignUp(
       content: "<p>to another note.</p>",
       x: 270,
       y: 300,
+      color: "#ffffff",
     },
     {
       creator_id: userId,
@@ -117,6 +122,7 @@ export async function handleSignUp(
       content: "<p>Delete a note by clicking the trash can icon or the ellipses button.</p>",
       x: -350,
       y: 650,
+      color: "#ffffff",
     },
     {
       creator_id: userId,
@@ -124,6 +130,7 @@ export async function handleSignUp(
       content: "<p></p>",
       x: 0,
       y: 650,
+      color: "#ffffff",
     },
   ];
   const { data: createdNotes, error: noteError } = await supabase.from("note").insert(defaultNotes).select("*");
