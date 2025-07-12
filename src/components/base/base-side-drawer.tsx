@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import {
   AlertDialog,
@@ -24,7 +24,29 @@ interface BaseSideDrawerProps {
   redirectPath: string;
   textEditorComponent: React.ForwardRefExoticComponent<BaseTextEditorProps & React.RefAttributes<BaseTextEditorRef>>;
   notes: Tables<"note">[];
-  debounceUpdate: DebouncedFunc<(id: string, updates: Partial<{ title: string; content: string }>) => Promise<void>>;
+  debounceUpdate: DebouncedFunc<(id: string, updates: Partial<Tables<"note">>) => Promise<void>>;
+}
+
+const NOTE_COLORS = [
+  "#f8fafc", // muted white
+  "#fef6e4", // soft yellow
+  "#fde2e4", // soft red
+  "#e0e7ff", // soft blue
+  "#d1fae5", // soft green
+  "#fbcfe8", // soft pink
+  "#fcd5ce", // soft orange
+  "#e2e8f0", // soft gray
+  "#fef9c3", // soft gold
+  "#bae6fd", // soft sky
+];
+function getContrastingColor(bg: string) {
+  if (!bg) return '#222';
+  const hex = bg.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.7 ? '#222' : '#fff';
 }
 
 export function BaseSideDrawer({
@@ -44,6 +66,18 @@ export function BaseSideDrawer({
   });
 
   const [dialog, setDialog] = useState(false);
+  const [localColor, setLocalColor] = useState(currentNote?.color || "#f8fafc");
+  useEffect(() => {
+    setLocalColor(currentNote?.color || "#f8fafc");
+  }, [currentNote?.color]);
+  const handleColorChange = useCallback(
+    (color: string) => {
+      if (!currentNote) return;
+      setLocalColor(color); // Optimistic UI
+      debounceUpdate(currentNote.id, { color });
+    },
+    [currentNote, debounceUpdate]
+  );
 
   const date = new Date(currentNote?.created_at || "").toLocaleDateString("en-US", {
     year: "numeric",
@@ -79,26 +113,29 @@ export function BaseSideDrawer({
     <div
       ref={divRef}
       className={`
-        fixed bg-white border-t-8 border-slate-500
+        fixed border-t-8
         ${currentNote ? "translate-y-[10%] sm:translate-0" : "translate-y-full sm:translate-x-full sm:translate-y-0"}
         top-0 transition-all duration-500 ease-in-out sm:right-0 bottom-0 w-full sm:w-1/2 max-w-[720px] flex flex-col shadow-lg
       `}
       style={{
         zIndex: 50,
         visibility: currentNote ? "visible" : "hidden",
+        backgroundColor: localColor,
+        borderTopColor: getContrastingColor(localColor),
       }}
     >
       {currentNote && (
         <>
           <div className="sm:pr-10 sm:pl-4 sm:pt-3 flex items-center justify-between">
-            <Wrapper onClick={resetFocus} className="hidden sm:block">
-              <ChevronsRight className="text-slate-500 max-w-4 max-h-4 sm:max-w-5 sm:max-h-5" />
+            <Wrapper onClick={resetFocus} className="hidden sm:block" style={{ backgroundColor: getContrastingColor(localColor) + '22' }}>
+              <ChevronsRight className="" style={{ color: getContrastingColor(localColor) }} />
             </Wrapper>
           </div>
           <div className="px-5 sm:px-10 pt-8 sm:pt-12 border-b border-slate-200">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <input
-                className="text-b18 sm:text-b32 text-slate-900 outline-none polymath"
+                className="text-b18 sm:text-b32 outline-none polymath"
+                style={{ color: getContrastingColor(localColor), backgroundColor: localColor }}
                 value={currentNote.title || ""}
                 onChange={async (e) => await onEditNoteContent(currentNote.id, { title: e.target.value })}
                 onKeyDown={handleKeyDown}
@@ -106,8 +143,8 @@ export function BaseSideDrawer({
               />
               <AlertDialog open={dialog} onOpenChange={setDialog}>
                 <AlertDialogTrigger asChild>
-                  <Wrapper>
-                    <TrashIcon size={20} className="text-slate-500" />
+                  <Wrapper style={{ backgroundColor: getContrastingColor(localColor) + '22' }}>
+                    <TrashIcon size={20} style={{ color: getContrastingColor(localColor) }} />
                   </Wrapper>
                 </AlertDialogTrigger>
                 <AlertDialogContent style={{ zIndex: 9999 }}>
@@ -147,6 +184,24 @@ export function BaseSideDrawer({
             <div className="flex gap-10 sm:gap-20 text-r12 sm:text-r14 pt-8 pb-7">
               <div className="text-slate-500">created at</div>
               <div className="text-slate-700">{date}</div>
+            </div>
+            <div className="flex flex-col gap-2 items-start pb-2">
+              <span className="text-xs text-slate-500 mb-1 text-left">Change color</span>
+              <div className="flex flex-wrap gap-1">
+                {NOTE_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    className={`w-6 h-6 rounded-full border-2 ${localColor === color ? "border-black" : "border-transparent"}`}
+                    style={{ backgroundColor: color }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleColorChange(color);
+                    }}
+                    aria-label={`Set note color to ${color}`}
+                    type="button"
+                  />
+                ))}
+              </div>
             </div>
           </div>
           <div className="px-5 sm:px-10 pt-8 h-full overflow-scroll no-scrollbar" data-dropdown-menu>
