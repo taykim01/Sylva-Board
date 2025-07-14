@@ -16,16 +16,16 @@ import { DebouncedFunc } from "lodash";
 import { BaseTextEditorProps, BaseTextEditorRef } from "./base-text-editor";
 
 const NOTE_COLORS = [
-  "#ffffff", // pure white
-  "#fffbea", // very light yellow
-  "#fff5f5", // very light red
-  "#f5f7ff", // very light blue
-  "#f3fff7", // very light green
-  "#fff5fa", // very light pink
-  "#fff7f0", // very light orange
-  "#f7fafd", // very light gray
-  "#fffde7", // very light gold
-  "#f0fbff", // very light sky
+  "#f3f3f3", // light gray (was #ffffff)
+  "#f7e9b0", // light yellow (was #fffbea)
+  "#f7d6d6", // light red (was #fff5f5)
+  "#dbe3fa", // light blue (was #f5f7ff)
+  "#d6f7e6", // light green (was #f3fff7)
+  "#f7d6e6", // light pink (was #fff5fa)
+  "#f7e2c6", // light orange (was #fff7f0)
+  "#e3e8ee", // light gray (was #f7fafd)
+  "#f7f2b0", // light gold (was #fffde7)
+  "#cbeaf7", // light sky (was #f0fbff)
 ];
 
 function getContrastingColor(bg: string) {
