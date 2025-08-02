@@ -194,9 +194,16 @@ export function BaseSideDrawer({
                     className={`
                       w-6 h-6 rounded-full border-2 transition-transform duration-150
                       hover:scale-110 hover:shadow-md ${
-                      localColor === color ? "border-gray-500" : "border-transparent"
-                    }`}
-                    style={{ backgroundColor: color }}
+                        localColor === color
+                          ? "border-gray-500"
+                          : color === "#ffffff"
+                          ? "border-gray-300"
+                          : "border-transparent"
+                      }`}
+                    style={{
+                      backgroundColor: color,
+                      boxShadow: color === "#ffffff" ? "0 0 0 1px rgba(0,0,0,0.1)" : "none",
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleColorChange(color);
@@ -208,7 +215,7 @@ export function BaseSideDrawer({
               </div>
             </div>
           </div>
-          <div className="px-5 sm:px-10 pt-8 h-full overflow-scroll no-scrollbar" data-dropdown-menu>
+          <div className="px-5 sm:px-10 py-8 flex-grow overflow-scroll no-scrollbar" data-dropdown-menu>
             <TextEditor
               ref={editorRef}
               noteId={currentNote.id}
@@ -216,6 +223,7 @@ export function BaseSideDrawer({
               notes={notes}
               debounceUpdate={debounceUpdate}
               currentNote={currentNote}
+              color={localColor}
             />
           </div>
         </>

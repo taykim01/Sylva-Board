@@ -30,13 +30,13 @@ const NOTE_COLORS = [
 
 function getContrastingColor(bg: string) {
   // Simple luminance check for contrast
-  if (!bg) return '#222';
-  const hex = bg.replace('#', '');
+  if (!bg) return "#222";
+  const hex = bg.replace("#", "");
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.7 ? '#222' : '#fff';
+  return luminance > 0.7 ? "#222" : "#fff";
 }
 
 type BaseNoteProps = {
@@ -44,12 +44,7 @@ type BaseNoteProps = {
   handle?: boolean;
   selectNote: (id: string) => void;
   deleteNote: (id: string) => Promise<void>;
-  debounceUpdate: DebouncedFunc<
-    (
-      id: string,
-      updates: Partial<Tables<"note">>,
-    ) => Promise<void>
-  >;
+  debounceUpdate: DebouncedFunc<(id: string, updates: Partial<Tables<"note">>) => Promise<void>>;
   createEdge: (
     sourceNoteId: string,
     targetNoteId: string,
@@ -107,7 +102,7 @@ export function BaseNote({
       setLocalColor(color); // Optimistic UI
       debounceUpdate(note.id, { color });
     },
-    [note.id, debounceUpdate]
+    [note.id, debounceUpdate],
   );
 
   return (
@@ -122,10 +117,15 @@ export function BaseNote({
       {handle && <Handles note={{ ...note, color: localColor }} isHovered={isHovered} createEdge={createEdge} />}
       <div className="flex flex-col gap-2 h-full">
         <div className="w-full flex justify-between items-center">
-          <div className="text-m14 polymath" style={{ color: getContrastingColor(localColor) }}>Note</div>
+          <div className="text-m14 polymath" style={{ color: getContrastingColor(localColor) }}>
+            Note
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Wrapper onClick={(e) => e.stopPropagation()} style={{ backgroundColor: getContrastingColor(localColor) + '22' }}>
+              <Wrapper
+                onClick={(e) => e.stopPropagation()}
+                style={{ backgroundColor: getContrastingColor(localColor) + "22" }}
+              >
                 <Ellipsis size={20} className="" style={{ color: getContrastingColor(localColor) }} />
               </Wrapper>
             </DropdownMenuTrigger>
@@ -146,8 +146,17 @@ export function BaseNote({
                     {NOTE_COLORS.map((color) => (
                       <button
                         key={color}
-                        className={`w-6 h-6 rounded-full border-2 transition-transform duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black hover:scale-110 hover:shadow-md ${localColor === color ? "border-black" : "border-transparent"}`}
-                        style={{ backgroundColor: color }}
+                        className={`w-6 h-6 rounded-full border-2 transition-transform duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black hover:scale-110 hover:shadow-md ${
+                          localColor === color
+                            ? "border-black"
+                            : color.startsWith("#f3")
+                            ? "border-gray-300"
+                            : "border-transparent"
+                        }`}
+                        style={{
+                          backgroundColor: color,
+                          boxShadow: color.startsWith("#f3") ? "0 0 0 1px rgba(0,0,0,0.1)" : "none",
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleColorChange(color);
