@@ -1,8 +1,9 @@
 #!/usr/bin/env tsx
 
 /**
- * One-time script to generate embeddings for all existing notes
- * Usage: npx tsx scripts/generate-embeddings.ts
+ * Script to regenerate ALL embeddings for existing notes
+ * This script should be run when the embedding model is changed
+ * It will replace ALL existing embeddings, not just missing ones
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -28,7 +29,7 @@ if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
-const EMBEDDING_MODEL = "text-embedding-ada-002";
+const EMBEDDING_MODEL = "text-embedding-3-small";
 const BATCH_SIZE = 10;
 const DELAY_BETWEEN_BATCHES = 1000; // 1 second delay between batches
 
@@ -64,14 +65,16 @@ async function sleep(ms: number): Promise<void> {
 async function processNote(note: Note): Promise<{ success: boolean; error?: string }> {
   try {
     // Combine title and content for embedding
-    const combinedText = `${note.title}\n\n${note.content}`.trim();
+    const combinedText = `${note.title}
+
+${note.content}`.trim();
 
     if (!combinedText) {
-      console.log(`Skipping note ${note.id} - empty content`);
+      console.log(`⏭️  Skipping note ${note.id} - empty content`);
       return { success: true };
     }
 
-    console.log(`Generating embedding for note: ${note.id} - "${note.title}"`);
+    console.log(`� Regenerating embedding for note: ${note.id} - "${note.title}"`);
 
     // Generate embedding
     const embedding = await generateEmbedding(combinedText);
@@ -86,7 +89,7 @@ async function processNote(note: Note): Promise<{ success: boolean; error?: stri
       throw new Error(`Database update failed: ${error.message}`);
     }
 
-    console.log(`✅ Successfully updated embedding for note: ${note.id}`);
+    console.log(`✅ Successfully regenerated embedding for note: ${note.id}`);
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -96,14 +99,21 @@ async function processNote(note: Note): Promise<{ success: boolean; error?: stri
 }
 
 async function main() {
-  console.log("🚀 Starting embedding generation for all notes...");
+  console.log("⚠️  WARNING: This will regenerate ALL embeddings in your database!");
+  console.log("💰 This will consume OpenAI API credits for ALL notes.");
+  console.log("🕐 This may take some time depending on the number of notes.");
+  console.log("Press Ctrl+C to cancel, or wait 5 seconds to continue...");
+
+  // 5 second delay for user to cancel
+  await sleep(5000);
+
+  console.log("🚀 Starting embedding regeneration for ALL notes...");
 
   try {
-    // Fetch all notes without embeddings
+    // Fetch ALL notes (not just ones without embeddings)
     const { data: notes, error: fetchError } = await supabase
       .from("note")
       .select("id, title, content, embedding")
-      .is("embedding", null)
       .order("created_at", { ascending: true });
 
     if (fetchError) {
@@ -111,17 +121,18 @@ async function main() {
     }
 
     if (!notes || notes.length === 0) {
-      console.log("✨ No notes found without embeddings. All notes are already processed!");
+      console.log("📝 No notes found in database.");
       return;
     }
 
-    console.log(`📝 Found ${notes.length} notes without embeddings`);
+    console.log(`📝 Found ${notes.length} total notes to regenerate`);
 
     const results = {
       total: notes.length,
       processed: 0,
       successful: 0,
       failed: 0,
+      skipped: 0,
       errors: [] as string[],
     };
 
@@ -131,7 +142,8 @@ async function main() {
       const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
       const totalBatches = Math.ceil(notes.length / BATCH_SIZE);
 
-      console.log(`\n📦 Processing batch ${batchNumber}/${totalBatches} (${batch.length} notes)`);
+      console.log(`
+📦 Processing batch ${batchNumber}/${totalBatches} (${batch.length} notes)`);
 
       // Process batch sequentially to avoid rate limits
       for (const note of batch) {
@@ -139,7 +151,11 @@ async function main() {
         results.processed++;
 
         if (result.success) {
-          results.successful++;
+          if (!note.title?.trim() && !note.content?.trim()) {
+            results.skipped++;
+          } else {
+            results.successful++;
+          }
         } else {
           results.failed++;
           results.errors.push(`Note ${note.id}: ${result.error}`);
@@ -157,28 +173,31 @@ async function main() {
     }
 
     // Print summary
-    console.log("\n🎉 Embedding generation completed!");
+    console.log("🎉 Embedding regeneration completed!");
     console.log("📊 Summary:");
     console.log(`   Total notes: ${results.total}`);
     console.log(`   Processed: ${results.processed}`);
     console.log(`   Successful: ${results.successful}`);
+    console.log(`   Skipped (empty): ${results.skipped}`);
     console.log(`   Failed: ${results.failed}`);
 
     if (results.errors.length > 0) {
-      console.log("\n❌ Errors encountered:");
+      console.log("❌ Errors encountered:");
       results.errors.forEach((error, index) => {
         console.log(`   ${index + 1}. ${error}`);
       });
     }
 
     if (results.failed === 0) {
-      console.log("\n✅ All embeddings generated successfully!");
+      console.log(`
+✅ All embeddings regenerated successfully! ${results.successful} embeddings updated.`);
     } else {
-      console.log(`\n⚠️  ${results.failed} notes failed to process. You may want to run this script again.`);
+      console.log(`
+⚠️  ${results.failed} notes failed to process. You may want to run this script again.`);
       process.exit(1);
     }
   } catch (error) {
-    console.error("💥 Fatal error:", error instanceof Error ? error.message : error);
+    console.error("� Fatal error:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

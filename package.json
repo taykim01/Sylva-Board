@@ -10,7 +10,8 @@
     "serve": "supabase start && next dev --turbopack",
     "generate-embeddings": "tsx scripts/generate-embeddings.ts",
     "generate-embeddings-client": "tsx scripts/generate-embeddings-client.ts",
-    "populate-embeddings": "tsx scripts/populate-missing-embeddings.ts"
+    "populate-embeddings": "tsx scripts/populate-missing-embeddings.ts",
+    "regenerate-embeddings": "tsx scripts/regenerate-all-embeddings.ts"
   },
   "dependencies": {
     "@next/third-parties": "^15.3.1",

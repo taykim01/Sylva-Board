@@ -1,3 +1,5 @@
+"use server"
+
 import { openai, EMBEDDING_MODEL, CHAT_MODEL } from "./client";
 import type { Tables } from "@/database.types";
 
@@ -74,7 +76,7 @@ export async function generateChatCompletion(
 ): Promise<ChatResponse> {
   try {
     // Prepare system message with context if relevant notes are provided
-    let systemMessage = `You are a helpful AI assistant that helps users interact with their notes. You can answer questions, provide summaries, and help with note management.`;
+    let systemMessage = `You are a helpful AI assistant that helps users interact with their notes. This is a service named Sylva and it is a lightweight memo board app. You can answer questions, provide summaries, and help with note management.`;
 
     if (relevantNotes && relevantNotes.length > 0) {
       const contextNotes = relevantNotes
@@ -95,8 +97,7 @@ export async function generateChatCompletion(
     const response = await openai.chat.completions.create({
       model: CHAT_MODEL,
       messages: apiMessages,
-      max_tokens: maxTokens,
-      temperature: 0.7,
+      max_completion_tokens: maxTokens,
       stream: false,
     });
 
@@ -148,8 +149,7 @@ Respond in JSON format:
           content: query,
         },
       ],
-      max_tokens: 200,
-      temperature: 0.3,
+      max_completion_tokens: 200,
     });
 
     const content = response.choices[0]?.message?.content;
