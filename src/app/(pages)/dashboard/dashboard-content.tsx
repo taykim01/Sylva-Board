@@ -5,12 +5,14 @@ import { BaseBoard } from "@/components/base/base-board";
 import { BaseList } from "@/components/base/base-list";
 import { BaseBottomBar } from "@/components/base/base-bottom-bar";
 import { BaseSideDrawer } from "@/components/base/base-side-drawer";
+import { AiChatbot } from "@/components/ai/ai-chatbot";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { BaseNote } from "@/components/base/base-note";
 import { BaseTextEditor, BaseTextEditorProps, BaseTextEditorRef } from "@/components/base/base-text-editor";
 import { forwardRef } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Tables } from "@/database.types";
+import useUserStore from "@/core/states/user.store";
 const DashboardTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props, ref) => {
   return <BaseTextEditor {...props} ref={ref} />;
 });
@@ -35,6 +37,7 @@ function DashboardNote(props: { data: Tables<"note"> }) {
 }
 
 export function DashboardContent({ userEmail }: { userEmail: string }) {
+  const { user } = useUserStore();
   const {
     notes,
     viewMode,
@@ -82,6 +85,7 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
         debounceUpdate={debounceUpdate}
       />
       <BaseBottomBar onCreateNote={handleCreateNote} />
+      {user?.id && <AiChatbot userId={user.id} />}
     </BaseContainer>
   );
 }

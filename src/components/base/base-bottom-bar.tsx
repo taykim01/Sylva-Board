@@ -6,7 +6,7 @@ interface BaseBottomBarProps {
 
 export function BaseBottomBar({ onCreateNote }: BaseBottomBarProps) {
   return (
-    <div className="fixed right-6 bottom-9 flex items-center gap-2">
+    <div className="fixed left-6 bottom-9 flex items-center gap-2">
       <div
         className="polymath rounded-full bg-slate-500 hover:bg-slate-600 transition-all duration-200 text-white h-10 text-m14 w-fit flex items-center gap-1 pr-3 pl-2 cursor-pointer"
         style={{ boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.08)" }}

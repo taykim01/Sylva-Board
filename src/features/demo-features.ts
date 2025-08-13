@@ -14,6 +14,8 @@ export async function handleDemoCreateEmptyNote(): Promise<Response<Tables<"note
     x: 0,
     y: 0,
     color: "#ffffff",
+    embedding: null,
+    shareable: false,
   };
   const { data: createdNote, error: noteError } = await supabase.from("note").insert(newNote).select("*").single();
   if (noteError) {

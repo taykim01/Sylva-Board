@@ -83,6 +83,8 @@ export async function handleSignUp(
       x: -450,
       y: -150,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
     {
       creator_id: userId,
@@ -91,6 +93,8 @@ export async function handleSignUp(
       x: -850,
       y: 270,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
     {
       creator_id: userId,
@@ -99,6 +103,8 @@ export async function handleSignUp(
       x: -550,
       y: 270,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
     {
       creator_id: userId,
@@ -107,6 +113,8 @@ export async function handleSignUp(
       x: -100,
       y: 100,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
     {
       creator_id: userId,
@@ -115,6 +123,8 @@ export async function handleSignUp(
       x: 270,
       y: 300,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
     {
       creator_id: userId,
@@ -123,6 +133,8 @@ export async function handleSignUp(
       x: -350,
       y: 650,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
     {
       creator_id: userId,
@@ -131,6 +143,8 @@ export async function handleSignUp(
       x: 0,
       y: 650,
       color: "#ffffff",
+      embedding: null,
+      shareable: false,
     },
   ];
   const { data: createdNotes, error: noteError } = await supabase.from("note").insert(defaultNotes).select("*");
