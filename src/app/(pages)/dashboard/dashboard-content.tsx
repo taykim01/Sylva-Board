@@ -7,9 +7,10 @@ import { BaseBottomBar } from "@/components/base/base-bottom-bar";
 import { BaseSideDrawer } from "@/components/base/base-side-drawer";
 import { AiChatbot } from "@/components/ai/ai-chatbot";
 import { useDashboard } from "@/hooks/use-dashboard";
+import { useEmbeddingPopulation } from "@/hooks/use-embedding-population";
 import { BaseNote } from "@/components/base/base-note";
 import { BaseTextEditor, BaseTextEditorProps, BaseTextEditorRef } from "@/components/base/base-text-editor";
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Tables } from "@/database.types";
 import useUserStore from "@/core/states/user.store";
@@ -38,6 +39,7 @@ function DashboardNote(props: { data: Tables<"note"> }) {
 
 export function DashboardContent({ userEmail }: { userEmail: string }) {
   const { user } = useUserStore();
+  const { populateUserEmbeddings } = useEmbeddingPopulation();
   const {
     notes,
     viewMode,
@@ -57,6 +59,16 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
     sendGAEvent("create_note");
     await createNote();
   };
+
+  // Populate missing embeddings on component mount
+  useEffect(() => {
+    if (user?.id) {
+      // Run embedding population in the background
+      populateUserEmbeddings(user.id).catch((error) => {
+        console.error("Background embedding population failed:", error);
+      });
+    }
+  }, [user?.id, populateUserEmbeddings]);
 
   return (
     <BaseContainer

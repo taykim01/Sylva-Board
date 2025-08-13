@@ -1,13 +1,18 @@
-"use server"
+"use server";
 
-import { createClient } from '@/infrastructures/supabase/client';
-import { generateEmbedding, generateNoteEmbedding, generateChatCompletion, processUserQuery } from '@/infrastructures/openai/services';
-import type { Tables } from '@/database.types';
-import type { RelevantNote, ChatMessage } from '@/infrastructures/openai/services';
+import { createClient } from "@/infrastructures/supabase/server";
+import {
+  generateEmbedding,
+  generateNoteEmbedding,
+  generateChatCompletion,
+  processUserQuery,
+} from "@/infrastructures/openai/services";
+import type { Tables } from "@/database.types";
+import type { RelevantNote, ChatMessage } from "@/infrastructures/openai/services";
 
 export interface ChatbotMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
   sources?: Tables<"note">[];
@@ -24,63 +29,63 @@ export interface ChatbotState {
  */
 export async function generateAndStoreNoteEmbedding(noteId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
-    
+    const supabase = await createClient();
+
     // Get the note
     const { data: note, error: fetchError } = await supabase
-      .from('note')
-      .select('id, title, content')
-      .eq('id', noteId)
+      .from("note")
+      .select("id, title, content")
+      .eq("id", noteId)
       .single();
 
     if (fetchError || !note) {
-      return { success: false, error: 'Failed to fetch note' };
+      return { success: false, error: "Failed to fetch note" };
     }
 
     // Generate embedding
     const { embedding, error: embeddingError } = await generateNoteEmbedding(note);
-    
+
     if (embeddingError || embedding.length === 0) {
-      return { success: false, error: embeddingError || 'Failed to generate embedding' };
+      return { success: false, error: embeddingError || "Failed to generate embedding" };
     }
 
     // Store embedding in database
     const { error: updateError } = await supabase
-      .from('note')
+      .from("note")
       .update({ embedding: JSON.stringify(embedding) })
-      .eq('id', noteId);
+      .eq("id", noteId);
 
     if (updateError) {
-      return { success: false, error: 'Failed to store embedding' };
+      return { success: false, error: "Failed to store embedding" };
     }
 
     return { success: true };
   } catch (error) {
-    console.error('Error generating and storing note embedding:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error("Error generating and storing note embedding:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
 
 /**
  * Generate embeddings for all notes that don't have them
  */
-export async function generateMissingEmbeddings(userId: string): Promise<{ 
-  processed: number; 
-  success: number; 
-  errors: string[] 
+export async function generateMissingEmbeddings(userId: string): Promise<{
+  processed: number;
+  success: number;
+  errors: string[];
 }> {
   try {
-    const supabase = createClient();
-    
+    const supabase = await createClient();
+
     // Get all notes without embeddings for this user
     const { data: notes, error: fetchError } = await supabase
-      .from('note')
-      .select('id, title, content')
-      .eq('creator_id', userId)
-      .is('embedding', null);
+      .from("note")
+      .select("id, title, content")
+      .eq("creator_id", userId)
+      .is("embedding", null);
 
     if (fetchError) {
-      return { processed: 0, success: 0, errors: ['Failed to fetch notes'] };
+      return { processed: 0, success: 0, errors: ["Failed to fetch notes"] };
     }
 
     if (!notes || notes.length === 0) {
@@ -90,14 +95,14 @@ export async function generateMissingEmbeddings(userId: string): Promise<{
     const results = {
       processed: notes.length,
       success: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     };
 
     // Process notes in batches to avoid rate limits
     const batchSize = 5;
     for (let i = 0; i < notes.length; i += batchSize) {
       const batch = notes.slice(i, i + batchSize);
-      
+
       const batchPromises = batch.map(async (note) => {
         const result = await generateAndStoreNoteEmbedding(note.id);
         if (result.success) {
@@ -108,20 +113,20 @@ export async function generateMissingEmbeddings(userId: string): Promise<{
       });
 
       await Promise.all(batchPromises);
-      
+
       // Small delay between batches
       if (i + batchSize < notes.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
     return results;
   } catch (error) {
-    console.error('Error generating missing embeddings:', error);
-    return { 
-      processed: 0, 
-      success: 0, 
-      errors: [error instanceof Error ? error.message : 'Unknown error'] 
+    console.error("Error generating missing embeddings:", error);
+    return {
+      processed: 0,
+      success: 0,
+      errors: [error instanceof Error ? error.message : "Unknown error"],
     };
   }
 }
@@ -130,31 +135,30 @@ export async function generateMissingEmbeddings(userId: string): Promise<{
  * Search for relevant notes using vector similarity
  */
 export async function searchRelevantNotes(
-  query: string, 
-  userId: string, 
+  query: string,
+  userId: string,
   limit: number = 5,
-  threshold: number = 0.5
+  threshold: number = 0.5,
 ): Promise<{ notes: RelevantNote[]; error?: string }> {
   try {
-    const supabase = createClient();
-    
+    const supabase = await createClient();
+
     // Generate embedding for the query
     const { embedding, error: embeddingError } = await generateEmbedding(query);
-    
+
     if (embeddingError || embedding.length === 0) {
-      return { notes: [], error: embeddingError || 'Failed to generate query embedding' };
+      return { notes: [], error: embeddingError || "Failed to generate query embedding" };
     }
 
     // Search for similar notes using the query_note function
-    const { data: similarNotes, error: searchError } = await supabase
-      .rpc('query_note', {
-        query_embedding: JSON.stringify(embedding),
-        match_threshold: threshold,
-        match_count: limit
-      });
+    const { data: similarNotes, error: searchError } = await supabase.rpc("query_note", {
+      query_embedding: JSON.stringify(embedding),
+      match_threshold: threshold,
+      match_count: limit,
+    });
 
     if (searchError) {
-      return { notes: [], error: 'Failed to search notes' };
+      return { notes: [], error: "Failed to search notes" };
     }
 
     if (!similarNotes || similarNotes.length === 0) {
@@ -164,17 +168,19 @@ export async function searchRelevantNotes(
     // Filter by user and calculate similarity scores
     const userNotes = similarNotes
       .filter((note: Tables<"note">) => note.creator_id === userId)
-      .map((note: Tables<"note">): RelevantNote => ({
-        note,
-        similarity: 0.8 // Placeholder - actual similarity would be calculated from distance
-      }));
+      .map(
+        (note: Tables<"note">): RelevantNote => ({
+          note,
+          similarity: 0.8, // Placeholder - actual similarity would be calculated from distance
+        }),
+      );
 
     return { notes: userNotes };
   } catch (error) {
-    console.error('Error searching relevant notes:', error);
-    return { 
-      notes: [], 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    console.error("Error searching relevant notes:", error);
+    return {
+      notes: [],
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -185,7 +191,7 @@ export async function searchRelevantNotes(
 export async function processChatMessage(
   message: string,
   conversationHistory: ChatMessage[],
-  userId: string
+  userId: string,
 ): Promise<{
   response: string;
   sources: Tables<"note">[];
@@ -194,51 +200,47 @@ export async function processChatMessage(
   try {
     // Step 1: Process the user query to understand intent and extract search terms
     const queryAnalysis = await processUserQuery(message);
-    
+
     // Step 2: Search for relevant notes
     const { notes: relevantNotes, error: searchError } = await searchRelevantNotes(
       queryAnalysis.processedQuery,
       userId,
       5,
-      0.3
+      0.3,
     );
-    
+
     if (searchError) {
-      console.warn('Search error:', searchError);
+      console.warn("Search error:", searchError);
     }
 
     // Step 3: Prepare conversation context
     const messages: ChatMessage[] = [
       ...conversationHistory.slice(-6), // Keep last 6 messages for context
-      { role: 'user', content: message }
+      { role: "user", content: message },
     ];
 
     // Step 4: Generate AI response with context
-    const { message: aiResponse, error: chatError } = await generateChatCompletion(
-      messages,
-      relevantNotes,
-      1000
-    );
+    const { message: aiResponse, error: chatError } = await generateChatCompletion(messages, relevantNotes, 1000);
 
     if (chatError) {
       return {
-        response: 'Sorry, I encountered an error while processing your message. Please try again.',
+        response: "Sorry, I encountered an error while processing your message. Please try again.",
         sources: [],
-        error: chatError
+        error: chatError,
       };
     }
 
     return {
       response: aiResponse,
-      sources: relevantNotes.map(item => item.note),
-      error: undefined
+      sources: relevantNotes.map((item) => item.note),
+      error: undefined,
     };
   } catch (error) {
-    console.error('Error processing chat message:', error);
+    console.error("Error processing chat message:", error);
     return {
-      response: 'Sorry, I encountered an error while processing your message. Please try again.',
+      response: "Sorry, I encountered an error while processing your message. Please try again.",
       sources: [],
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -248,7 +250,7 @@ export async function processChatMessage(
  */
 export async function handleNoteChange(note: Tables<"note">): Promise<void> {
   // Generate embedding in the background
-  generateAndStoreNoteEmbedding(note.id).catch(error => {
-    console.error('Failed to generate embedding for note:', note.id, error);
+  generateAndStoreNoteEmbedding(note.id).catch((error) => {
+    console.error("Failed to generate embedding for note:", note.id, error);
   });
 }

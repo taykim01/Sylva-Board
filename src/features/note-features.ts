@@ -4,6 +4,7 @@ import { createClient } from "@/infrastructures/supabase/server";
 import { Tables } from "@/database.types";
 import { handleGetUser } from "./auth-features";
 import { Response } from "@/core/types";
+import { generateAndStoreNoteEmbedding } from "./ai-chat-features";
 
 export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
@@ -27,6 +28,14 @@ export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>>
     console.error("Error creating empty note:", noteError.message);
     throw new Error(noteError.message);
   }
+
+  // Generate embedding for the new note in the background
+  if (createdNote) {
+    generateAndStoreNoteEmbedding(createdNote.id).catch((error) => {
+      console.error("Failed to generate embedding for new note:", createdNote.id, error);
+    });
+  }
+
   return { data: createdNote as Tables<"note">, error: null };
 }
 
@@ -66,6 +75,14 @@ export async function handleUpdateNote(
     console.error("Error updating note:", noteError.message);
     throw new Error(noteError.message);
   }
+
+  // If title or content was updated, regenerate embedding
+  if (updatedNote && (updates.title !== undefined || updates.content !== undefined)) {
+    generateAndStoreNoteEmbedding(updatedNote.id).catch((error) => {
+      console.error("Failed to regenerate embedding for updated note:", updatedNote.id, error);
+    });
+  }
+
   return { data: updatedNote as Tables<"note">, error: null };
 }
 

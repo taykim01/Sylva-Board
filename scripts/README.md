@@ -1,6 +1,17 @@
-# Embedding Generation Script
+# Embedding Generation Scripts
 
-This script generates embeddings for all existing notes in your Supabase database.
+This directory contains scripts for generating and managing embeddings for notes in your Supabase database.
+
+## Scripts
+
+### 1. `generate-embeddings.ts` (Legacy)
+The original embedding generation script.
+
+### 2. `generate-embeddings-client.ts`  
+Client-side embedding generation script.
+
+### 3. `populate-missing-embeddings.ts` (Recommended)
+**New script to populate embeddings for existing notes that don't have them.**
 
 ## Prerequisites
 
@@ -19,35 +30,55 @@ This script generates embeddings for all existing notes in your Supabase databas
 
 ## Usage
 
-Run the script to generate embeddings for all notes that don't have them:
+### For Production: Populate Missing Embeddings
+
+Run this script to generate embeddings for all existing notes that don't have them:
 
 ```bash
-npm run generate-embeddings
+npm run populate-embeddings
 ```
 
-## What it does
+### Legacy Scripts
 
-1. **Fetches all notes** without embeddings from your database
-2. **Generates embeddings** for each note using OpenAI's text-embedding-ada-002 model
-3. **Combines title and content** for better context in embeddings  
-4. **Processes notes in batches** to avoid rate limits
-5. **Updates the database** with the generated embeddings
-6. **Provides progress feedback** and error handling
+```bash
+# Original script
+npm run generate-embeddings
+
+# Client-side script  
+npm run generate-embeddings-client
+```
+
+## What the populate-missing-embeddings script does
+
+1. **Finds all notes** without embeddings in your database
+2. **Skips empty notes** (notes with no title and no content)
+3. **Generates embeddings** using OpenAI's text-embedding-3-small model
+4. **Combines title and content** with proper formatting for better semantic context
+5. **Processes notes in batches** to avoid API rate limits (5 notes per batch)
+6. **Updates the database** with the generated embeddings
+7. **Provides detailed progress feedback** and error reporting
+8. **Graceful error handling** - continues processing other notes if one fails
+
+## Automatic Embedding Generation
+
+The application now automatically generates embeddings for:
+- **New notes** when they are created
+- **Updated notes** when title or content is modified
+- **Missing embeddings** when users log into the dashboard (background process)
 
 ## Rate Limiting
 
 The script includes built-in rate limiting:
-- Processes notes in batches of 10
-- 200ms delay between individual requests
-- 1000ms delay between batches
+- Processes notes in batches of 5
+- 2 second delay between batches
 - This should stay well within OpenAI's rate limits
 
 ## Cost Estimation
 
-The text-embedding-ada-002 model costs $0.0001 per 1K tokens. For typical notes:
-- Short note (50 words): ~$0.000005
-- Medium note (200 words): ~$0.00002  
-- Long note (500 words): ~$0.00005
+The text-embedding-3-small model is very cost-effective. For typical notes:
+- Short note (50 words): ~$0.000001
+- Medium note (200 words): ~$0.000004  
+- Long note (500 words): ~$0.00001
 
 For 1000 notes, expect to pay around $0.01-$0.05.
 
