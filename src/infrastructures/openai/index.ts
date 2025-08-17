@@ -9,4 +9,7 @@ export const openai = new OpenAI({
 });
 
 export const EMBEDDING_MODEL = "text-embedding-3-large";
-export const CHAT_MODEL = "gpt-5-2025-08-07";
+export const CHAT_MODELS = {
+  gpt5: "gpt-5",
+  gpt4omini: "gpt-4o-mini",
+};

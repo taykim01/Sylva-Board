@@ -5,7 +5,6 @@ import { Tables } from "@/database.types";
 import { handleCreateEdge, handleUpdateEdge, handleDeleteEdge } from "@/features/edge-features";
 import { handleCreateEmptyNote, handleDeleteNote, handleUpdateNote } from "@/features/note-features";
 import { updateSettings } from "@/features/settings-features";
-import { handleNoteChange } from "@/features/ai-chat-features";
 import { Position } from "@xyflow/react";
 import { debounce } from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,8 +36,6 @@ export function useDashboard() {
       const { data, error } = await handleCreateEmptyNote();
       if (error) throw error;
       _addNote(data!);
-      // Generate embedding for the new note
-      handleNoteChange(data!);
     } catch (error) {
       setError(error as string);
     } finally {
@@ -92,12 +89,8 @@ export function useDashboard() {
     debounce(async (id: string, updates: Partial<{ title: string; content: string }>) => {
       _updateNote(id, updates);
       try {
-        const { error, data } = await handleUpdateNote(id, updates);
+        const { error } = await handleUpdateNote(id, updates);
         if (error) throw error;
-        // Generate embedding for content changes only
-        if (data && (updates.title !== undefined || updates.content !== undefined)) {
-          handleNoteChange(data);
-        }
       } catch (error) {
         setError(error as string);
       }

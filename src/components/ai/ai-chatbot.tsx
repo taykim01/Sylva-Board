@@ -4,14 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useAiChat } from "@/hooks/use-ai-chat";
-import type { ChatbotMessage } from "@/features/ai-chat-features";
+import { ChatbotMessage, useAIChat } from "@/hooks/use-ai-chat";
 import { MessageCircle, X, Send, ExternalLink } from "lucide-react";
 import Spinner from "@/components/common/spinner";
-
-interface AiChatbotProps {
-  userId: string;
-}
 
 interface MessageProps {
   message: ChatbotMessage;
@@ -23,23 +18,21 @@ function Message({ message, onSourceClick }: MessageProps) {
     <div
       className={cn(
         "flex gap-2 p-3 rounded-lg text-sm",
-        message.role === "user"
+        message.sender === "user"
           ? "bg-slate-50 dark:bg-slate-800/50 ml-6"
           : "bg-white dark:bg-gray-800/30 mr-6 border border-gray-100 dark:border-gray-700",
       )}
     >
-      <div className="flex-1">
+      <div className="flex-grow w-full">
         <div
           className={cn(
             "text-xs font-medium mb-1",
-            message.role === "user" ? "text-slate-600 dark:text-slate-400" : "text-gray-600 dark:text-gray-400",
+            message.sender === "user" ? "text-slate-600 dark:text-slate-400" : "text-gray-600 dark:text-gray-400",
           )}
         >
-          {message.role === "user" ? "You" : "AI Assistant"}
+          {message.sender === "user" ? "You" : "AI Assistant"}
         </div>
-        <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed">
-          {message.content}
-        </div>
+        <div className="text-sm text-gray-900 dark:text-gray-100 leading-relaxed break-words">{message.text}</div>
 
         {/* Show sources if available */}
         {message.sources && message.sources.length > 0 && (
@@ -61,23 +54,20 @@ function Message({ message, onSourceClick }: MessageProps) {
         )}
 
         <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-          {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </div>
       </div>
     </div>
   );
 }
 
-export function AiChatbot({ userId }: AiChatbotProps) {
+export function AiChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, isLoading, error, isInitialized, sendMessage, clearMessages, clearError } = useAiChat({
-    userId,
-    isOpen,
-  });
+  const { messages, loading, error, sendMessage, clearMessages, clearError } = useAIChat();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -94,24 +84,20 @@ export function AiChatbot({ userId }: AiChatbotProps) {
   }, [isOpen]);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || loading) return;
 
     const message = inputValue.trim();
     setInputValue("");
     await sendMessage(message);
   };
 
-  const handleSourceClick = (noteId: string) => {
-    // This would typically scroll to or highlight the note
-    // For now, we'll just log it
-    console.log("Navigate to note:", noteId);
+  const handleSourceClick = () => {
+    alert("jk");
   };
 
   const toggleChatbot = () => {
     setIsOpen(!isOpen);
-    if (error) {
-      clearError();
-    }
+    if (error) clearError();
   };
 
   return (
@@ -127,11 +113,6 @@ export function AiChatbot({ userId }: AiChatbotProps) {
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-slate-600" />
               <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm">AI Assistant</h3>
-              {!isInitialized && (
-                <div className="text-xs px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded">
-                  Initializing...
-                </div>
-              )}
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="sm" onClick={clearMessages} className="text-xs h-6 px-2">
@@ -155,12 +136,12 @@ export function AiChatbot({ userId }: AiChatbotProps) {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {messages.map((message) => (
-              <Message key={message.id} message={message} onSourceClick={handleSourceClick} />
+            {messages.map((message, i) => (
+              <Message key={i} message={message} onSourceClick={handleSourceClick} />
             ))}
 
             {/* Loading indicator */}
-            {isLoading && (
+            {loading && (
               <div className="flex items-center gap-2 p-3 text-sm text-gray-600 dark:text-gray-400">
                 <Spinner />
                 <span>AI is thinking...</span>
@@ -180,11 +161,11 @@ export function AiChatbot({ userId }: AiChatbotProps) {
                 onEnter={handleSendMessage}
                 placeholder="Ask about your notes..."
                 className="flex-1"
-                disabled={isLoading || !isInitialized}
+                disabled={loading}
               />
               <Button
                 onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isLoading || !isInitialized}
+                disabled={!inputValue.trim() || loading}
                 size="icon"
                 className="shrink-0"
               >

@@ -4,7 +4,7 @@ import { createClient } from "@/infrastructures/supabase/server";
 import { Tables } from "@/database.types";
 import { handleGetUser } from "./auth-features";
 import { Response } from "@/core/types";
-import { generateAndStoreNoteEmbedding } from "./ai-chat-features";
+import { EMBEDDING_MODEL, openai } from "@/infrastructures/openai";
 
 export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
@@ -27,13 +27,6 @@ export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>>
   if (noteError) {
     console.error("Error creating empty note:", noteError.message);
     throw new Error(noteError.message);
-  }
-
-  // Generate embedding for the new note in the background
-  if (createdNote) {
-    generateAndStoreNoteEmbedding(createdNote.id).catch((error) => {
-      console.error("Failed to generate embedding for new note:", createdNote.id, error);
-    });
   }
 
   return { data: createdNote as Tables<"note">, error: null };
@@ -76,11 +69,28 @@ export async function handleUpdateNote(
     throw new Error(noteError.message);
   }
 
-  // If title or content was updated, regenerate embedding
-  if (updatedNote && (updates.title !== undefined || updates.content !== undefined)) {
-    generateAndStoreNoteEmbedding(updatedNote.id).catch((error) => {
-      console.error("Failed to regenerate embedding for updated note:", updatedNote.id, error);
-    });
+  const hasUpdate = updatedNote && (updates.title !== undefined || updates.content !== undefined);
+  if (!hasUpdate) return { data: updatedNote as Tables<"note">, error: null };
+
+  const combinedText = [updates.title?.trim() || "", updates.content?.trim() || ""].filter(Boolean).join("\n\n");
+  if (!combinedText.trim()) throw new Error("Note has no content to embed");
+
+  const response = await openai.embeddings.create({
+    model: EMBEDDING_MODEL,
+    input: combinedText.trim(),
+  });
+
+  if (!response.data[0]?.embedding) throw new Error("Failed to generate embedding");
+
+  const embedding = response.data[0].embedding;
+  const { error: updateError } = await supabase
+    .from("note")
+    .update({ embedding })
+    .eq("id", id);
+
+  if (updateError) {
+    console.error("Error updating note embedding:", updateError.message);
+    throw new Error(updateError.message);
   }
 
   return { data: updatedNote as Tables<"note">, error: null };
