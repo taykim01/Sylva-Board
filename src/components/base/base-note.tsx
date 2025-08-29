@@ -14,6 +14,7 @@ import Wrapper from "../notes/wrapper";
 import { Position } from "@xyflow/react";
 import { DebouncedFunc } from "lodash";
 import { BaseTextEditorProps, BaseTextEditorRef } from "./base-text-editor";
+import { NoteDashboardReassign } from "../dashboard/note-dashboard-reassign";
 
 const NOTE_COLORS = [
   "#f3f3f3", // light gray (was #ffffff)
@@ -54,6 +55,10 @@ type BaseNoteProps = {
   textEditorComponent: React.ForwardRefExoticComponent<BaseTextEditorProps & React.RefAttributes<BaseTextEditorRef>>;
   notes: Tables<"note">[];
   currentNote: Tables<"note"> | undefined;
+  // Dashboard reassignment props
+  dashboards?: Tables<"dashboard">[];
+  currentDashboard?: Tables<"dashboard"> | null;
+  onReassignNote?: (noteId: string, dashboardId: string) => Promise<void>;
 };
 
 export function BaseNote({
@@ -66,6 +71,9 @@ export function BaseNote({
   textEditorComponent: TextEditor,
   notes,
   currentNote,
+  dashboards = [],
+  currentDashboard,
+  onReassignNote,
 }: BaseNoteProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [title, setTitle] = useState(note.title);
@@ -139,6 +147,19 @@ export function BaseNote({
               >
                 Delete
               </DropdownMenuItem>
+              {onReassignNote && dashboards.length > 1 && (
+                <DropdownMenuItem asChild>
+                  <div className="flex items-center justify-between w-full">
+                    <span>Move to Dashboard</span>
+                    <NoteDashboardReassign
+                      note={note}
+                      dashboards={dashboards}
+                      currentDashboard={currentDashboard || null}
+                      onReassign={onReassignNote}
+                    />
+                  </div>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild>
                 <div className="flex flex-col gap-2 items-start">
                   <span className="text-xs text-slate-500 mb-1 text-left">Change color</span>

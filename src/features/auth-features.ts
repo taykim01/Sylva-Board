@@ -43,7 +43,7 @@ export async function handleSignIn(email: string, password: string): Promise<Res
 export async function handleSignUp(
   email: string,
   password: string,
-): Promise<Response<{ user: Tables<"user">; notes: Tables<"note">[]; edges: Tables<"edge">[], settings: Tables<"settings"> } | null>> {
+): Promise<Response<{ user: Tables<"user">; dashboard: Tables<"dashboard">; notes: Tables<"note">[]; edges: Tables<"edge">[], settings: Tables<"settings"> } | null>> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -75,9 +75,23 @@ export async function handleSignUp(
     return { data: null, error: userError.message };
   }
 
+  // Create default dashboard
+  const defaultDashboard: Omit<Tables<"dashboard">, "id" | "created_at"> = {
+    user_id: userId,
+    title: "My First Dashboard",
+    description: "Welcome to your first dashboard!"
+  };
+  const { data: createdDashboard, error: dashboardError } = await supabase.from("dashboard").insert(defaultDashboard).select("*").single();
+  if (dashboardError) {
+    console.error("Error creating default dashboard:", dashboardError.message);
+    return { data: null, error: dashboardError.message };
+  }
+
+  const dashboardId = createdDashboard.id;
+
   const defaultNotes: Omit<Tables<"note">, "id" | "created_at">[] = [
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Welcome to Sylva!",
       content: "<p>Sylva is a note-taking app that allows you to create and manage notes.</p>",
       x: -450,
@@ -87,7 +101,7 @@ export async function handleSignUp(
       shareable: false,
     },
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Create a note",
       content: "<p>Create a note by clicking the + button.</p>",
       x: -850,
@@ -97,7 +111,7 @@ export async function handleSignUp(
       shareable: false,
     },
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Writing notes",
       content: "<p>Use <strong><em><mark>markdown</mark></em></strong> to format your notes.</p>",
       x: -550,
@@ -107,7 +121,7 @@ export async function handleSignUp(
       shareable: false,
     },
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Connect notes",
       content: "<p>Connect two notes by dragging from one note...</p>",
       x: -100,
@@ -117,7 +131,7 @@ export async function handleSignUp(
       shareable: false,
     },
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Connect notes",
       content: "<p>to another note.</p>",
       x: 270,
@@ -127,7 +141,7 @@ export async function handleSignUp(
       shareable: false,
     },
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Delete notes",
       content: "<p>Delete a note by clicking the trash can icon or the ellipses button.</p>",
       x: -350,
@@ -137,7 +151,7 @@ export async function handleSignUp(
       shareable: false,
     },
     {
-      creator_id: userId,
+      dashboard_id: dashboardId,
       title: "Have fun!",
       content: "<p></p>",
       x: 0,
@@ -185,6 +199,7 @@ export async function handleSignUp(
   return {
     data: {
       user: createdUser as Tables<"user">,
+      dashboard: createdDashboard as Tables<"dashboard">,
       notes: createdNotes as Tables<"note">[],
       edges: [createdEdge as Tables<"edge">],
       settings: createdSettings as Tables<"settings">,

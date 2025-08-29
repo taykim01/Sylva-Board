@@ -36,6 +36,7 @@ export async function handleGetEdges(): Promise<Response<Tables<"edge">[]>> {
 
   const supabase = await createClient();
   const notedIds = data.map((note) => note.id);
+
   const { data: edges, error: edgesError } = await supabase
     .from("edge")
     .select("*")

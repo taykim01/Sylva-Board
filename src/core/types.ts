@@ -15,8 +15,13 @@ export interface SettingsState {
 export interface DashboardState {
   notes: Tables<"note">[];
   viewMode: "board" | "list";
+  currentDashboard: Tables<"dashboard"> | null;
+  dashboards: Tables<"dashboard">[];
   _setNotes: (notes: Tables<"note">[]) => void;
   _setViewMode: (viewMode: "board" | "list") => void;
+  _setCurrentDashboard: (dashboard: Tables<"dashboard"> | null) => void;
+  _setDashboards: (dashboards: Tables<"dashboard">[]) => void;
+  _addDashboard: (dashboard: Tables<"dashboard">) => void;
   _addNote: (note: Tables<"note">) => void;
   _updateNote: (id: string, note: Partial<Tables<"note">>) => void;
   _deleteNote: (id: string) => void;

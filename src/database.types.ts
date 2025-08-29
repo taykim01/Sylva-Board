@@ -7,13 +7,45 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
+      dashboard: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       edge: {
         Row: {
           id: string
@@ -76,7 +108,7 @@ export type Database = {
           color: string
           content: string
           created_at: string
-          creator_id: string | null
+          dashboard_id: string
           embedding: string | null
           id: string
           shareable: boolean
@@ -88,7 +120,7 @@ export type Database = {
           color?: string
           content: string
           created_at?: string
-          creator_id?: string | null
+          dashboard_id: string
           embedding?: string | null
           id?: string
           shareable?: boolean
@@ -100,7 +132,7 @@ export type Database = {
           color?: string
           content?: string
           created_at?: string
-          creator_id?: string | null
+          dashboard_id?: string
           embedding?: string | null
           id?: string
           shareable?: boolean
@@ -110,10 +142,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "note_creator_id_fkey"
-            columns: ["creator_id"]
+            foreignKeyName: "note_dashboard_id_fkey"
+            columns: ["dashboard_id"]
             isOneToOne: false
-            referencedRelation: "user"
+            referencedRelation: "dashboard"
             referencedColumns: ["id"]
           },
         ]
@@ -171,16 +203,23 @@ export type Database = {
     }
     Functions: {
       query_note: {
-        Args: {
-          query_embedding: string
-          match_threshold: number
-          match_count: number
-        }
+        Args:
+          | {
+              creator: string
+              match_count: number
+              match_threshold: number
+              query_embedding: string
+            }
+          | {
+              match_count: number
+              match_threshold: number
+              query_embedding: string
+            }
         Returns: {
           color: string
           content: string
           created_at: string
-          creator_id: string | null
+          dashboard_id: string
           embedding: string | null
           id: string
           shareable: boolean

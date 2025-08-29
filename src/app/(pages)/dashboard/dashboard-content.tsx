@@ -7,6 +7,7 @@ import { BaseBottomBar } from "@/components/base/base-bottom-bar";
 import { BaseSideDrawer } from "@/components/base/base-side-drawer";
 import { AiChatbot } from "@/components/ai/ai-chatbot";
 import { useDashboard } from "@/hooks/use-dashboard";
+import { useDashboardManager } from "@/hooks/use-dashboard-manager";
 import { BaseNote } from "@/components/base/base-note";
 import { BaseTextEditor, BaseTextEditorProps, BaseTextEditorRef } from "@/components/base/base-text-editor";
 import { forwardRef } from "react";
@@ -19,7 +20,12 @@ const DashboardTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((
 
 DashboardTextEditor.displayName = "DashboardTextEditor";
 
-function DashboardNote(props: { data: Tables<"note"> }) {
+function DashboardNote(props: { 
+  data: Tables<"note">;
+  dashboards?: Tables<"dashboard">[];
+  currentDashboard?: Tables<"dashboard"> | null;
+  onReassignNote?: (noteId: string, dashboardId: string) => Promise<void>;
+}) {
   const { notes, selectNote, deleteNote, debounceUpdate, createEdge, currentNote, viewMode } = useDashboard();
   return (
     <BaseNote
@@ -32,6 +38,9 @@ function DashboardNote(props: { data: Tables<"note"> }) {
       textEditorComponent={DashboardTextEditor}
       notes={notes}
       currentNote={currentNote}
+      dashboards={props.dashboards}
+      currentDashboard={props.currentDashboard}
+      onReassignNote={props.onReassignNote}
     />
   );
 }
@@ -51,12 +60,47 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
     createEdge,
     deleteEdge,
     debounceUpdate,
+    currentDashboard,
+    dashboards,
+    _setCurrentDashboard,
+    _addDashboard,
   } = useDashboard();
+  
+  const {
+    createDashboard,
+    reassignNote,
+    loading: dashboardLoading,
+  } = useDashboardManager();
 
   const handleCreateNote = async () => {
     sendGAEvent("create_note");
     await createNote();
   };
+
+  const handleDashboardSelect = (dashboard: Tables<"dashboard">) => {
+    _setCurrentDashboard(dashboard);
+  };
+
+  const handleDashboardCreate = async (title: string, description?: string) => {
+    const newDashboard = await createDashboard(title, description);
+    _addDashboard(newDashboard);
+    _setCurrentDashboard(newDashboard);
+  };
+
+  // Create a wrapper for reassignNote that doesn't return data
+  const handleReassignNote = async (noteId: string, dashboardId: string) => {
+    await reassignNote(noteId, dashboardId);
+  };
+
+  // Create a wrapped DashboardNote component with dashboard props
+  const DashboardNoteWithProps = (props: { data: Tables<"note"> }) => (
+    <DashboardNote
+      data={props.data}
+      dashboards={dashboards}
+      currentDashboard={currentDashboard}
+      onReassignNote={handleReassignNote}
+    />
+  );
 
   return (
     <BaseContainer
@@ -65,6 +109,11 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
       onToggleViewMode={toggleViewMode}
       accountName={userEmail}
       showSignOutButton={true}
+      currentDashboard={currentDashboard}
+      dashboards={dashboards}
+      onDashboardSelect={handleDashboardSelect}
+      onDashboardCreate={handleDashboardCreate}
+      dashboardLoading={dashboardLoading}
     >
       <BaseBoard
         notes={notes}
@@ -72,9 +121,9 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
         onMoveNote={moveNote}
         onCreateEdge={createEdge}
         onDeleteEdge={deleteEdge}
-        nodeComponent={DashboardNote}
+        nodeComponent={DashboardNoteWithProps}
       />
-      <BaseList notes={notes} viewMode={viewMode as "board" | "list"} noteComponent={DashboardNote} />
+      <BaseList notes={notes} viewMode={viewMode as "board" | "list"} noteComponent={DashboardNoteWithProps} />
       <BaseSideDrawer
         currentNote={currentNote || null}
         onDeleteNote={deleteNote}

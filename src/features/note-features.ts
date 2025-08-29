@@ -6,15 +6,15 @@ import { handleGetUser } from "./auth-features";
 import { Response } from "@/core/types";
 import { EMBEDDING_MODEL, openai } from "@/infrastructures/openai";
 
-export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>> {
+export async function handleCreateEmptyNote(dashboardId: string): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
-  const { data, error } = await handleGetUser();
+  const { error } = await handleGetUser();
   if (error) {
     console.error("Error creating empty note:", error);
     throw new Error(error);
   }
+
   const newNote: Omit<Tables<"note">, "id" | "created_at"> = {
-    creator_id: data!.id,
     title: "",
     content: "",
     x: 0,
@@ -22,6 +22,7 @@ export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>>
     color: "#ffffff",
     embedding: null,
     shareable: false,
+    dashboard_id: dashboardId,
   };
   const { data: createdNote, error: noteError } = await supabase.from("note").insert(newNote).select("*").single();
   if (noteError) {
@@ -32,14 +33,29 @@ export async function handleCreateEmptyNote(): Promise<Response<Tables<"note">>>
   return { data: createdNote as Tables<"note">, error: null };
 }
 
-export async function handleGetMyNotes(): Promise<Response<Tables<"note">[]>> {
+export async function handleGetMyNotes(dashboardId?: string): Promise<Response<Tables<"note">[]>> {
   const supabase = await createClient();
   const { data, error } = await handleGetUser();
   if (error) {
     console.error("Error getting notes:", error);
     throw new Error(error);
   }
-  const { data: notes, error: notesError } = await supabase.from("note").select("*").eq("creator_id", data!.id);
+
+  if (!dashboardId) {
+    const userId = data?.id;
+    if(!userId) throw new Error("User not found");
+
+    const myDashboards = await supabase.from("dashboard").select("*").eq("user_id", userId);
+    if (myDashboards.error) {
+      console.error("Error getting dashboards:", myDashboards.error.message);
+      throw new Error(myDashboards.error.message);
+    }
+
+    const finalDashboardId = dashboardId || myDashboards.data[0]?.id;
+    dashboardId = finalDashboardId;
+  }
+
+  const { data: notes, error: notesError } = await supabase.from("note").select("*").eq("dashboard_id", dashboardId);
   if (notesError) {
     console.error("Error getting notes:", notesError.message);
     throw new Error(notesError.message);
@@ -83,10 +99,7 @@ export async function handleUpdateNote(
   if (!response.data[0]?.embedding) throw new Error("Failed to generate embedding");
 
   const embedding = response.data[0].embedding;
-  const { error: updateError } = await supabase
-    .from("note")
-    .update({ embedding })
-    .eq("id", id);
+  const { error: updateError } = await supabase.from("note").update({ embedding }).eq("id", id);
 
   if (updateError) {
     console.error("Error updating note embedding:", updateError.message);

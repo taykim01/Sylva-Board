@@ -18,12 +18,17 @@ export function useDashboard() {
   const {
     edges,
     notes,
+    currentDashboard,
+    dashboards,
     _addNote,
     _updateNote,
     _deleteNote,
     _addEdge,
     _updateEdge,
     _deleteEdge,
+    _setCurrentDashboard,
+    _setDashboards,
+    _addDashboard,
   } = useDashboardStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +38,9 @@ export function useDashboard() {
   const createNote = async () => {
     setLoading(true);
     try {
-      const { data, error } = await handleCreateEmptyNote();
+      const dashboardId = currentDashboard?.id;
+      if (!dashboardId) throw new Error("No current dashboard selected");
+      const { data, error } = await handleCreateEmptyNote(dashboardId);
       if (error) throw error;
       _addNote(data!);
     } catch (error) {
@@ -181,5 +188,10 @@ export function useDashboard() {
     updateEdge,
     deleteEdge,
     edges,
+    currentDashboard,
+    dashboards,
+    _setCurrentDashboard,
+    _setDashboards,
+    _addDashboard,
   };
 }

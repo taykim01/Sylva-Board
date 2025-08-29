@@ -4,8 +4,13 @@ import { DashboardState } from "../types";
 const useDashboardStore = create<DashboardState>()((set) => ({
   notes: [],
   viewMode: "board",
+  currentDashboard: null,
+  dashboards: [],
   _setNotes: (notes) => set({ notes: notes }),
   _setViewMode: (viewMode) => set({ viewMode }),
+  _setCurrentDashboard: (dashboard) => set({ currentDashboard: dashboard }),
+  _setDashboards: (dashboards) => set({ dashboards }),
+  _addDashboard: (dashboard) => set((state) => ({ dashboards: [...state.dashboards, dashboard] })),
   _addNote: (note) => set((state) => ({ notes: [...state.notes, note] })),
   _updateNote: (id, note) =>
     set((state) => ({

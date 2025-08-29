@@ -8,7 +8,7 @@ import { Position } from "@xyflow/react";
 export async function handleDemoCreateEmptyNote(): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
   const newNote: Omit<Tables<"note">, "id" | "created_at"> = {
-    creator_id: process.env.NEXT_PUBLIC_DEMO_ID!,
+    dashboard_id: process.env.NEXT_PUBLIC_DEMO_DASHBOARD_ID!,
     title: "",
     content: "",
     x: 0,
