@@ -76,8 +76,11 @@ export function useAuth() {
     }
   };
 
+  const isLoggedIn = !!user;
+
   return {
     user,
+    isLoggedIn,
     settings,
     loading,
     error,
