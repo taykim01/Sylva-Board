@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ChatbotMessage, useAIChat } from "@/hooks/use-ai-chat";
 import { MessageCircle, X, Send, ExternalLink } from "lucide-react";
 import Spinner from "@/components/common/spinner";
+import { useTranslation } from "react-i18next";
 
 interface MessageProps {
   message: ChatbotMessage;
@@ -14,6 +15,8 @@ interface MessageProps {
 }
 
 function Message({ message, onSourceClick }: MessageProps) {
+    const { t } = useTranslation('common');
+  
   return (
     <div
       className={cn(
@@ -30,14 +33,14 @@ function Message({ message, onSourceClick }: MessageProps) {
             message.sender === "user" ? "text-slate-600 dark:text-slate-400" : "text-gray-600 dark:text-gray-400",
           )}
         >
-          {message.sender === "user" ? "You" : "AI Assistant"}
+          {message.sender === "user" ? t('ai.you') : t('ai.aiAssistant')}
         </div>
         <div className="text-sm text-gray-900 dark:text-gray-100 leading-relaxed break-words">{message.text}</div>
 
         {/* Show sources if available */}
         {message.sources && message.sources.length > 0 && (
           <div className="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Sources from your notes:</div>
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{t('ai.sourcesFromNotes')}</div>
             <div className="flex flex-wrap gap-1">
               {message.sources.map((note) => (
                 <button
@@ -45,7 +48,7 @@ function Message({ message, onSourceClick }: MessageProps) {
                   onClick={() => onSourceClick?.(note.id)}
                   className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                 >
-                  <span className="truncate max-w-[120px]">{note.title || "Untitled"}</span>
+                  <span className="truncate max-w-[120px]">{note.title || t('notes.untitled')}</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </button>
               ))}
@@ -66,6 +69,7 @@ export function AiChatbot() {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation('common');
 
   const { messages, loading, error, sendMessage, clearMessages, clearError } = useAIChat();
 
@@ -92,7 +96,7 @@ export function AiChatbot() {
   };
 
   const handleSourceClick = () => {
-    alert("jk");
+    // TODO: Implement source navigation
   };
 
   const toggleChatbot = () => {
@@ -112,11 +116,11 @@ export function AiChatbot() {
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-slate-600" />
-              <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm">AI Assistant</h3>
+              <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{t('ai.aiAssistant')}</h3>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="sm" onClick={clearMessages} className="text-xs h-6 px-2">
-                Clear
+                {t('ai.clear')}
               </Button>
               <Button variant="ghost" size="sm" onClick={toggleChatbot} className="h-6 w-6 p-0">
                 <X className="w-3 h-3" />
@@ -127,9 +131,9 @@ export function AiChatbot() {
           {/* Error Display */}
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-950/20 border-b border-red-200 dark:border-red-800">
-              <div className="text-sm text-red-700 dark:text-red-300">Error: {error}</div>
+              <div className="text-sm text-red-700 dark:text-red-300">{t('common.error')}: {error}</div>
               <Button variant="ghost" size="sm" onClick={clearError} className="text-xs mt-1">
-                Dismiss
+                {t('common.dismiss')}
               </Button>
             </div>
           )}
@@ -144,7 +148,7 @@ export function AiChatbot() {
             {loading && (
               <div className="flex items-center gap-2 p-3 text-sm text-gray-600 dark:text-gray-400">
                 <Spinner />
-                <span>AI is thinking...</span>
+                <span>{t('ai.thinking')}</span>
               </div>
             )}
 
@@ -159,7 +163,7 @@ export function AiChatbot() {
                 value={inputValue}
                 onChange={setInputValue}
                 onEnter={handleSendMessage}
-                placeholder="Ask about your notes..."
+                placeholder={t('ai.typeMessage')}
                 className="flex-1"
                 disabled={loading}
               />
@@ -188,12 +192,12 @@ export function AiChatbot() {
         {isOpen ? (
           <>
             <X className="w-4 h-4" />
-            <div className="mt-0.5">Close Chat</div>
+            <div className="mt-0.5">{t('ai.closeChat')}</div>
           </>
         ) : (
           <>
             <MessageCircle className="w-4 h-4" />
-            <div className="mt-0.5">Ask AI</div>
+            <div className="mt-0.5">{t('ai.askAI')}</div>
           </>
         )}
       </div>

@@ -16,6 +16,7 @@ import { Tables } from "@/database.types";
 import Wrapper from "../notes/wrapper";
 import { BaseTextEditorProps, BaseTextEditorRef } from "./base-text-editor";
 import { DebouncedFunc } from "lodash";
+import { useTranslation } from "react-i18next";
 
 interface BaseSideDrawerProps {
   currentNote: Tables<"note"> | null;
@@ -58,6 +59,7 @@ export function BaseSideDrawer({
   debounceUpdate,
   onEditNoteContent,
 }: BaseSideDrawerProps) {
+  const { t } = useTranslation('common');
   const divRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<BaseTextEditorRef>(null);
   const { resetFocus } = useClickOutside({
@@ -141,7 +143,7 @@ export function BaseSideDrawer({
                 value={currentNote.title || ""}
                 onChange={async (e) => await onEditNoteContent(currentNote.id, { title: e.target.value })}
                 onKeyDown={handleKeyDown}
-                placeholder="New Note"
+                placeholder={t('notes.newNote')}
               />
               <AlertDialog open={dialog} onOpenChange={setDialog}>
                 <AlertDialogTrigger asChild>
@@ -151,10 +153,9 @@ export function BaseSideDrawer({
                 </AlertDialogTrigger>
                 <AlertDialogContent style={{ zIndex: 9999 }}>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('notes.deleteConfirmTitle')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account and remove your data from
-                      our servers.
+                      {t('notes.deleteConfirmDescription')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -166,7 +167,7 @@ export function BaseSideDrawer({
                         setDialog(false);
                       }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                     <Button
                       size="sm"
@@ -177,16 +178,16 @@ export function BaseSideDrawer({
                         setDialog(false);
                       }}
                     >
-                      Delete
+                      {t('common.delete')}
                     </Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
             <div className="text-r12 sm:text-r14 py-8 grid grid-cols-[1fr_5fr] gap-x-10 gap-y-5">
-              <div className="text-slate-500">created at</div>
+              <div className="text-slate-500">{t('notes.createdAt')}</div>
               <div className="text-slate-700">{date}</div>
-              <div className="text-slate-500">color</div>
+              <div className="text-slate-500">{t('notes.color')}</div>
               <div className="flex flex-wrap gap-1">
                 {NOTE_COLORS.map((color) => (
                   <button

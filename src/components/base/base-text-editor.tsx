@@ -19,6 +19,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 import { useEffect, forwardRef, useImperativeHandle } from "react";
+import { useTranslation } from "react-i18next";
 import SlashCommands from "../notes/slash-commands";
 import { Tables } from "@/database.types";
 import { DebouncedFunc } from "lodash";
@@ -49,13 +50,14 @@ export interface BaseTextEditorRef {
 }
 
 export const BaseTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props, ref) => {
+  const { t } = useTranslation('common');
   const note = props.notes?.find((note) => note.id === props.noteId);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: props.isSideDrawer ? "Start typing..." : "",
+        placeholder: props.isSideDrawer ? t('notes.typeHere') : "",
         showOnlyWhenEditable: true,
         emptyEditorClass: "is-editor-empty",
         emptyNodeClass: "is-empty",

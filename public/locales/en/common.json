@@ -1,0 +1,114 @@
+{
+  "header": {
+    "dashboard": "Dashboard",
+    "login": "Log In",
+    "freeBoard": "Free Board",
+    "logOut": "Log Out",
+    "boardView": "Board View",
+    "installApp": "Install App",
+    "language": "Language"
+  },
+  "languages": {
+    "en": "English",
+    "ko": "한국어"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signUpHere": "Sign up here",
+    "signInHere": "Sign in here",
+    "welcomeBack": "Welcome Back",
+    "welcomeToSylva": "Welcome to Sylva",
+    "createBoardSubtitle": "Create your personal board to get started",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "confirmPassword": "Confirm your password",
+    "confirmPasswordLabel": "Confirm Password"
+  },
+  "dashboard": {
+    "createNew": "Create New",
+    "title": "Title",
+    "description": "Description",
+    "create": "Create",
+    "cancel": "Cancel",
+    "untitledDashboard": "Untitled Dashboard",
+    "reassignNote": "Reassign Note",
+    "createDashboard": "Create Dashboard",
+    "selectDashboard": "Select Dashboard",
+    "enterTitle": "Enter dashboard title",
+    "descriptionOptional": "Description (Optional)",
+    "enterDescription": "Enter dashboard description",
+    "creating": "Creating..."
+  },
+  "demo": {
+    "startDemo": "Start Demo",
+    "welcomeToDemo": "Welcome to Demo",
+    "tryFeatures": "Try out the features",
+    "demoDescription": "You can start a demo session without signing up.",
+    "start": "Start",
+    "demoAccount": "Demo Account"
+  },
+  "notes": {
+    "untitledNote": "Untitled Note",
+    "newNote": "New Note",
+    "addNote": "Add Note",
+    "typeHere": "Type here...",
+    "searchNotes": "Search notes...",
+    "untitled": "Untitled",
+    "deleteConfirmTitle": "Are you absolutely sure?",
+    "deleteConfirmDescription": "This action cannot be undone. This will permanently delete your note.",
+    "createdAt": "created at",
+    "color": "color",
+    "moveToDashboard": "Move to Dashboard",
+    "changeColor": "Change Color"
+  },
+  "ai": {
+    "askAI": "Ask AI",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "error": "Something went wrong. Please try again.",
+    "you": "You",
+    "aiAssistant": "AI Assistant",
+    "placeholder": "Type a message...",
+    "clear": "Clear",
+    "closeChat": "Close Chat",
+    "sourcesFromNotes": "Sources from your notes:"
+  },
+  "common": {
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "trySylva": "Try Sylva!",
+    "signOut": "Sign Out",
+    "requestFeature": "Request a Feature",
+    "requestFeatureTitle": "Request a Feature",
+    "requestFeatureDescription": "Thank you for your feedback!\nWe will review your request and get back to you as soon as possible.",
+    "requestFeaturePlaceholder": "Please describe your feature request",
+    "sendRequest": "Send Request",
+    "dismiss": "Dismiss"
+  },
+  "home": {
+    "title": "Your Personal Digital Board",
+    "subtitle": "A modern, lightweight alternative to Notion. Create, organize, and collaborate on boards with rich text editing, task management, and real-time features - perfect for university students who need a simple yet powerful workspace.",
+    "getStarted": "Get Started",
+    "toDashboard": "To Dashboard",
+    "tryWithoutAccount": "Want to try Sylva without an account?",
+    "features": {
+      "richTextTitle": "🎨 Rich Text Editing",
+      "richTextDesc": "Powerful TipTap editor with formatting, tables, and image support",
+      "collaborationTitle": "🔄 Seamless Co-Work",
+      "collaborationDesc": "Work together real-time with live updates and sync",
+      "taskManagementTitle": "🎯 Task Management",
+      "taskManagementDesc": "Stay organized with built-in task tracking and board management"
+    }
+  }
+}

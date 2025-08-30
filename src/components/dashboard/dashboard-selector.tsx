@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Plus, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { DashboardCreateDialog } from "./dashboard-create-dialog";
+import { useTranslation } from "react-i18next";
 
 interface DashboardSelectorProps {
   currentDashboard: Tables<"dashboard"> | null;
@@ -30,6 +31,7 @@ export function DashboardSelector({
   loading = false,
 }: DashboardSelectorProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { t } = useTranslation('common');
 
   const handleCreateDashboard = async (title: string, description?: string) => {
     await onDashboardCreate(title, description);
@@ -49,7 +51,7 @@ export function DashboardSelector({
             <div className="flex items-center gap-2">
               <LayoutDashboard size={16} />
               <span className="truncate">
-                {currentDashboard?.title || "Select Dashboard"}
+                {currentDashboard?.title || t('dashboard.selectDashboard')}
               </span>
             </div>
             <ChevronDown size={14} />
@@ -77,7 +79,7 @@ export function DashboardSelector({
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setCreateDialogOpen(true)}>
             <Plus size={16} className="mr-2" />
-            Create Dashboard
+            {t('dashboard.createDashboard')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

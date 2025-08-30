@@ -19,6 +19,8 @@ import { sendGAEvent } from "@next/third-parties/google";
 import { Tables } from "@/database.types";
 import { DashboardSelector } from "../dashboard/dashboard-selector";
 import Link from "next/link";
+import { LanguageSelector } from "../common/language-selector";
+import { useTranslation } from "react-i18next";
 
 interface BaseContainerProps {
   children: ReactNode;
@@ -52,6 +54,7 @@ export function BaseContainer({
 }: BaseContainerProps) {
   const { signOut } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation('common');
 
   const toSignIn = async () => {
     await signOut(true);
@@ -91,19 +94,20 @@ export function BaseContainer({
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={(e) => e.preventDefault()}>
                 <Switch id="view-mode" checked={viewMode === "board"} onCheckedChange={onToggleViewMode} />
-                <Label htmlFor="view-mode">Board View</Label>
+                <Label htmlFor="view-mode">{t('header.boardView')}</Label>
               </DropdownMenuItem>
               {showTryButton && (
                 <DropdownMenuItem onClick={toSignUp} id="try-sylva-button">
                   <Rocket size={16} className="text-slate-600" />
-                  Try Sylva!
+                  {t('common.trySylva')}
                 </DropdownMenuItem>
               )}
+              <LanguageSelector />
               <FeatureRequestMenu />
               {showSignOutButton && (
                 <DropdownMenuItem onClick={toSignIn}>
                   <LogOut size={16} className="text-slate-600" />
-                  Sign Out
+                  {t('common.signOut')}
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>

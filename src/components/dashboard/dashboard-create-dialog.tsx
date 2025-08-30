@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 interface DashboardCreateDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function DashboardCreateDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation('common');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,28 +56,28 @@ export function DashboardCreateDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Dashboard</DialogTitle>
+          <DialogTitle>{t('dashboard.createNew')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">{t('dashboard.title')} *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(value: string) => setTitle(value)}
-                placeholder="Enter dashboard title..."
+                placeholder={t('dashboard.enterTitle')}
                 required
                 disabled={loading}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description">{t('dashboard.descriptionOptional')}</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(value: string) => setDescription(value)}
-                placeholder="Enter dashboard description..."
+                placeholder={t('dashboard.enterDescription')}
                 rows={3}
                 disabled={loading}
               />
@@ -88,13 +90,13 @@ export function DashboardCreateDialog({
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               type="submit" 
               disabled={!title.trim() || loading}
             >
-              {loading ? "Creating..." : "Create Dashboard"}
+              {loading ? t('dashboard.creating') : t('dashboard.createDashboard')}
             </Button>
           </DialogFooter>
         </form>

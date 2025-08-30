@@ -184,6 +184,7 @@ export async function handleSignUp(
   const defaultSettings: Omit<Tables<"settings">, "id"> = {
     user_id: userId,
     view: "board",
+    language: "en",
   };
   const { data: createdSettings, error: settingsError } = await supabase
     .from("settings")

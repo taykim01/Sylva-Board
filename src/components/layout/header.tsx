@@ -15,8 +15,11 @@ import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { FeatureRequestMenu } from "./feature-request-menu";
+import { LanguageSelector } from "@/components/common/language-selector";
+import { useTranslation } from "react-i18next";
 
 export default function Header() {
+  const { t } = useTranslation('common');
   const { signOut, user } = useAuth();
   const { isInstallable, handleInstallClick } = usePWAInstall();
   const { toggleViewMode, viewMode } = useDashboard();
@@ -24,7 +27,9 @@ export default function Header() {
   return (
     <div className="h-10 py-2 px-4 bg-white flex items-center justify-between border-b border-slate-200 sticky top-0 z-10">
       <Logo size={48} />
-      <DropdownMenu>
+      <div className="flex items-center gap-2">
+        <LanguageSelector />
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer">
             <div className="text-slate-800 text-m14 polymath">{user?.email}</div>
@@ -35,12 +40,12 @@ export default function Header() {
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={(e) => e.preventDefault()}>
               <Switch id="view-mode" checked={viewMode === "board"} onCheckedChange={toggleViewMode} />
-              <Label htmlFor="view-mode">Board View</Label>
+              <Label htmlFor="view-mode">{t('header.boardView')}</Label>
             </DropdownMenuItem>
             {isInstallable && (
               <DropdownMenuItem onClick={handleInstallClick}>
                 <Download size={16} />
-                Install App
+                {t('header.installApp')}
               </DropdownMenuItem>
             )}
             <FeatureRequestMenu />
@@ -53,11 +58,12 @@ export default function Header() {
                   fill="#384151"
                 />
               </svg>
-              Log Out
+              {t('header.logOut')}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

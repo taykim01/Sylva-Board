@@ -17,3 +17,32 @@ export async function updateSettings(id: string, newSettings: Partial<Tables<"se
     }
     return { data: updatedSettings as Tables<"settings">, error: null };
 }
+
+export async function getSettingsByUserId(userId: string) {
+    const supabase = await createClient();
+    const { data: settings, error: settingsError } = await supabase
+      .from("settings")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+    if (settingsError) {
+      console.error("Error getting settings:", settingsError.message);
+      return { data: null, error: settingsError.message };
+    }
+    return { data: settings as Tables<"settings">, error: null };
+}
+
+export async function updateUserLanguage(userId: string, language: string) {
+    const supabase = await createClient();
+    const { data: updatedSettings, error: settingsError } = await supabase
+      .from("settings")
+      .update({ language })
+      .eq("user_id", userId)
+      .select("*")
+      .single();
+    if (settingsError) {
+      console.error("Error updating language:", settingsError.message);
+      return { data: null, error: settingsError.message };
+    }
+    return { data: updatedSettings as Tables<"settings">, error: null };
+}

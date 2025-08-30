@@ -153,16 +153,19 @@ export type Database = {
       settings: {
         Row: {
           id: string
+          language: string
           user_id: string
           view: string
         }
         Insert: {
           id?: string
+          language?: string
           user_id: string
           view: string
         }
         Update: {
           id?: string
+          language?: string
           user_id?: string
           view?: string
         }

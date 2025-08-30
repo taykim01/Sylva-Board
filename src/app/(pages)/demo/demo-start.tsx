@@ -12,8 +12,10 @@ import { useState } from "react";
 import { Button } from "../../../components/ui/button";
 import Spinner from "../../../components/common/spinner";
 import { useDemo } from "@/hooks/use-demo";
+import { useTranslation } from "react-i18next";
 
 export function DemoStart() {
+  const { t } = useTranslation('common');
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const { readEdges, readMyNotes } = useDemo();
@@ -35,12 +37,12 @@ export function DemoStart() {
     <Dialog open={open}>
       <DialogContent className="w-100" noX>
         <DialogHeader>
-          <DialogTitle>Start Demo</DialogTitle>
-          <DialogDescription>You can start a demo session without signing up.</DialogDescription>
+          <DialogTitle>{t('demo.startDemo')}</DialogTitle>
+          <DialogDescription>{t('demo.demoDescription')}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button onClick={handleStart} disabled={loading}>
-            {loading ? <Spinner /> : "Start"}
+            {loading ? <Spinner /> : t('demo.start')}
           </Button>
         </DialogFooter>
       </DialogContent>

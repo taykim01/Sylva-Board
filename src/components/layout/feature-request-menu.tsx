@@ -8,8 +8,10 @@ import { Dialog } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Wrench } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function FeatureRequestMenu() {
+  const { t } = useTranslation('common');
   const { requestFeature, loading, setFeature, disabled, requestDialog, setRequestDialog } = useRequestFeature();
 
   return (
@@ -21,22 +23,25 @@ export function FeatureRequestMenu() {
         }}
       >
         <Wrench size={16} className="text-slate-600" />
-        Request a Feature
+        {t('common.requestFeature')}
       </DropdownMenuItem>
       <Dialog open={requestDialog} onOpenChange={setRequestDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request a Feature</DialogTitle>
+            <DialogTitle>{t('common.requestFeatureTitle')}</DialogTitle>
             <DialogDescription>
-              Thank you for your feedback!
-              <br />
-              We will review your request and get back to you as soon as possible.
+              {t('common.requestFeatureDescription').split('\n').map((line, index) => (
+                <span key={index}>
+                  {line}
+                  {index < t('common.requestFeatureDescription').split('\n').length - 1 && <br />}
+                </span>
+              ))}
             </DialogDescription>
           </DialogHeader>
-          <Textarea onChange={setFeature} className="resize-none" placeholder="Please describe your feature request" />
+          <Textarea onChange={setFeature} className="resize-none" placeholder={t('common.requestFeaturePlaceholder')} />
           <DialogFooter>
             <Button onClick={requestFeature} loading={loading} disabled={disabled}>
-              Send Request
+              {t('common.sendRequest')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,10 +1,14 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 interface BaseBottomBarProps {
   onCreateNote: () => Promise<void>;
 }
 
 export function BaseBottomBar({ onCreateNote }: BaseBottomBarProps) {
+  const { t } = useTranslation('common');
+
   return (
     <div className="fixed left-6 bottom-6 flex items-center gap-2 z-40">
       <div
@@ -15,7 +19,7 @@ export function BaseBottomBar({ onCreateNote }: BaseBottomBarProps) {
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path d="M4.5 9H13.5M9 13.5V4.5" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <div className="mt-0.5">Add Note</div>
+        <div className="mt-0.5">{t('notes.addNote')}</div>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { Tables } from "@/database.types";
 import { BaseNote } from "@/components/base/base-note";
 import { BaseTextEditor, BaseTextEditorProps, BaseTextEditorRef } from "@/components/base/base-text-editor";
 import { forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 
 const DemoTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props, ref) => {
   return <BaseTextEditor {...props} ref={ref} />;
@@ -35,6 +36,7 @@ function DemoNote(props: { data: Tables<"note"> }) {
 }
 
 export function DemoContent() {
+  const { t } = useTranslation('common');
   const {
     notes,
     viewMode,
@@ -54,7 +56,7 @@ export function DemoContent() {
       className="relative"
       viewMode={viewMode ?? "board"}
       onToggleViewMode={toggleViewMode}
-      accountName="Demo Account"
+      accountName={t('demo.demoAccount')}
       showTryButton
     >
       <BaseBoard

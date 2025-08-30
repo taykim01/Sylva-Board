@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { I18nProvider } from "@/components/providers/i18n-provider";
 import localFont from "next/font/local";
 import { ReactNode } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -58,8 +59,10 @@ export default function RootLayout({
         <meta name="naver-site-verification" content="35ef34718a2f289d1ac5296c2e8837ddc55b4451" />
       </head>
       <body className={pretendard.variable}>
-        {children}
-        <Toaster position="bottom-left" />
+        <I18nProvider>
+          {children}
+          <Toaster position="bottom-left" />
+        </I18nProvider>
       </body>
       <GoogleAnalytics gaId="G-PEY6NYJ1MN" />
     </html>

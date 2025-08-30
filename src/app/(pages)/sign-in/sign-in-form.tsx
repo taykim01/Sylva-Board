@@ -3,25 +3,27 @@
 import AuthPaper from "@/components/auth/auth-paper";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
+import { useTranslation } from "react-i18next";
 
 export default function SignInForm() {
   const { loading, signIn, setEmail, setPassword, email, password } = useAuth();
+  const { t } = useTranslation('common');
 
   return (
     <AuthPaper
-      title="Welcome back!"
+      title={t('auth.welcomeBack')}
       cta={{
-        text: "Sign In",
+        text: t('auth.signIn'),
         onClick: signIn,
         disabled: !email || !password,
         loading,
       }}
     >
       <div className="flex flex-col gap-5">
-        <Input placeholder="Enter Email" label="Email" onChange={setEmail} value={email} onEnter={signIn} />
+        <Input placeholder={t('auth.enterEmail')} label={t('auth.email')} onChange={setEmail} value={email} onEnter={signIn} />
         <Input
-          placeholder="Enter password"
-          label="Password"
+          placeholder={t('auth.enterPassword')}
+          label={t('auth.password')}
           type="password"
           onChange={setPassword}
           value={password}

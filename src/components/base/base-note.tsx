@@ -15,6 +15,7 @@ import { Position } from "@xyflow/react";
 import { DebouncedFunc } from "lodash";
 import { BaseTextEditorProps, BaseTextEditorRef } from "./base-text-editor";
 import { NoteDashboardReassign } from "../dashboard/note-dashboard-reassign";
+import { useTranslation } from "react-i18next";
 
 const NOTE_COLORS = [
   "#f3f3f3", // light gray (was #ffffff)
@@ -79,6 +80,7 @@ export function BaseNote({
   const [title, setTitle] = useState(note.title);
   const [localColor, setLocalColor] = useState(note.color || "#f8fafc");
   const editorRef = useRef<{ editor: { commands: { focus: () => void } } }>(null);
+  const { t } = useTranslation('common');
 
   const dateToLocaleString = new Date(note.created_at).toLocaleString("en-US", {
     dateStyle: "short",
@@ -150,7 +152,7 @@ export function BaseNote({
               {onReassignNote && dashboards.length > 1 && (
                 <DropdownMenuItem asChild>
                   <div className="flex items-center justify-between w-full">
-                    <span>Move to Dashboard</span>
+                    <span>{t('notes.moveToDashboard')}</span>
                     <NoteDashboardReassign
                       note={note}
                       dashboards={dashboards}
@@ -162,7 +164,7 @@ export function BaseNote({
               )}
               <DropdownMenuItem asChild>
                 <div className="flex flex-col gap-2 items-start">
-                  <span className="text-xs text-slate-500 mb-1 text-left">Change color</span>
+                  <span className="text-xs text-slate-500 mb-1 text-left">{t('notes.changeColor')}</span>
                   <div className="flex flex-wrap gap-1">
                     {NOTE_COLORS.map((color) => (
                       <button
@@ -195,7 +197,7 @@ export function BaseNote({
         <div className="flex flex-col gap-3 h-full nowheel overflow-scroll no-scrollbar">
           <input
             className="text-b18 text-slate-800 outline-none w-full polymath"
-            placeholder="New Note"
+            placeholder={t('notes.newNote')}
             value={title || ""}
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
