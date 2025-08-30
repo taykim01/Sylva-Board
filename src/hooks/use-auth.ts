@@ -76,7 +76,7 @@ export function useAuth() {
     }
   };
 
-  const isLoggedIn = !!user;
+  const isLoggedIn = user && Object.keys(user).length > 0;
 
   return {
     user,

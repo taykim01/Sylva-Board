@@ -6,7 +6,9 @@ import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 
 export default function HomeHeader() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
+
+  console.log({ user });
 
   return (
     <header className="h-16 px-6 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-10">
@@ -19,14 +21,14 @@ export default function HomeHeader() {
         </Link>
       ) : (
         <div className="flex gap-4">
-          <Link href="/auth">
-            <Button variant="ghost" size="sm" className="text-m14 text-white">
+          <Link href="/sign-in">
+            <Button variant="outline" size="sm" className="text-m14">
               Log In
             </Button>
           </Link>
           <Link href="/demo">
-            <Button variant="outline" size="sm" className="text-m14">
-              Try Demo
+            <Button variant="ghost" size="sm" className="text-m14">
+              Free Board
             </Button>
           </Link>
         </div>
