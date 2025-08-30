@@ -7,12 +7,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Languages } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useSafeTranslation } from "@/hooks/use-safe-translation";
 import { useLanguage } from "@/hooks/use-language";
 import { Language } from "@/core/states/language.store";
 
 export function LanguageSelector() {
-  const { t } = useTranslation('common');
+  const { t } = useSafeTranslation('common');
   const { language, setLanguage } = useLanguage();
 
   const languages: { code: Language; name: string }[] = [

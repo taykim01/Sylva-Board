@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Plus, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { DashboardCreateDialog } from "./dashboard-create-dialog";
-import { useTranslation } from "react-i18next";
+import { useSafeTranslation } from "@/hooks/use-safe-translation";
 
 interface DashboardSelectorProps {
   currentDashboard: Tables<"dashboard"> | null;
@@ -31,7 +31,7 @@ export function DashboardSelector({
   loading = false,
 }: DashboardSelectorProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const { t } = useTranslation('common');
+  const { t } = useSafeTranslation('common');
 
   const handleCreateDashboard = async (title: string, description?: string) => {
     await onDashboardCreate(title, description);

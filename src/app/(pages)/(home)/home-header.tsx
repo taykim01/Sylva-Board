@@ -4,11 +4,11 @@ import { Logo } from "@/components/common/logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { LanguageSelector } from "@/components/common/language-selector";
-import { useTranslation } from "react-i18next";
+import { useSafeTranslation } from "@/hooks/use-safe-translation";
 import Link from "next/link";
 
 export default function HomeHeader() {
-  const { t } = useTranslation('common');
+  const { t } = useSafeTranslation('common');
   const { isLoggedIn } = useAuth();
 
   return (
