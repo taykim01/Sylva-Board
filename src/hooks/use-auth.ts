@@ -66,6 +66,7 @@ export function useAuth() {
       _setUser(data!.user);
       _setNotes(data!.notes);
       _setEdges(data!.edges);
+      _setSettings(data!.settings);
       router.push("/dashboard");
       toast("Signed up!");
     } catch (error) {

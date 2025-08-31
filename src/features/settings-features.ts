@@ -4,6 +4,12 @@ import { createClient } from "@/infrastructures/supabase/server";
 import { Tables } from "@/database.types";
 
 export async function updateSettings(id: string, newSettings: Partial<Tables<"settings">>){
+    if (!id || id === "undefined" || id === "null") {
+      const error = "Invalid settings ID provided";
+      console.error("Error updating settings:", error);
+      throw new Error(error);
+    }
+
     const supabase = await createClient();
     const { data: updatedSettings, error: settingsError } = await supabase
       .from("settings")

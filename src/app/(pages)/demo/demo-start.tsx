@@ -12,10 +12,10 @@ import { useState } from "react";
 import { Button } from "../../../components/ui/button";
 import Spinner from "../../../components/common/spinner";
 import { useDemo } from "@/hooks/use-demo";
-import { useTranslation } from "react-i18next";
+import { useSafeTranslation } from "@/hooks/use-safe-translation";
 
 export function DemoStart() {
-  const { t } = useTranslation('common');
+  const { t } = useSafeTranslation('common');
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const { readEdges, readMyNotes } = useDemo();

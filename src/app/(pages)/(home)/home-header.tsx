@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { LanguageSelector } from "@/components/common/language-selector";
 import { useSafeTranslation } from "@/hooks/use-safe-translation";
 import Link from "next/link";
+import { sendGAEvent } from "@next/third-parties/google";
 
 export default function HomeHeader() {
   const { t } = useSafeTranslation('common');
@@ -30,7 +31,7 @@ export default function HomeHeader() {
               </Button>
             </Link>
             <Link href="/demo">
-              <Button variant="ghost" size="sm" className="text-m14">
+              <Button variant="ghost" size="sm" className="text-m14" onClick={() => sendGAEvent("click_free_board")}>
                 {t('header.freeBoard')}
               </Button>
             </Link>

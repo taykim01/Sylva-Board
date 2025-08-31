@@ -4,11 +4,15 @@ import { createClient } from "@/infrastructures/supabase/server";
 import { Tables } from "@/database.types";
 import { Response } from "@/core/types";
 import { Position } from "@xyflow/react";
+import { contextPrompt } from "@/core/prompts";
+import OpenAIService, { ChatCompletionParam } from "@/services/openai.service";
+import SupabaseService from "@/services/supabase.service";
+import TABLES from "@/infrastructures/supabase/tables";
 
 export async function handleDemoCreateEmptyNote(): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
   const newNote: Omit<Tables<"note">, "id" | "created_at"> = {
-    dashboard_id: process.env.NEXT_PUBLIC_DEMO_DASHBOARD_ID!,
+    dashboard_id: "518ff0b2-2db0-4d11-9306-6325ea4a31ee",
     title: "",
     content: "",
     x: 0,
@@ -30,7 +34,7 @@ export async function handleDemoGetMyNotes(): Promise<Response<Tables<"note">[]>
   const { data: notes, error: notesError } = await supabase
     .from("note")
     .select("*")
-    .eq("creator_id", process.env.NEXT_PUBLIC_DEMO_ID!);
+    .eq("dashboard_id", "518ff0b2-2db0-4d11-9306-6325ea4a31ee");
   if (notesError) {
     console.error("Error getting notes:", notesError.message);
     return { data: null, error: notesError.message };
@@ -131,4 +135,88 @@ export async function handleDemoDeleteEdge(id: string) {
     return { data: null, error: error.message };
   }
   return { data: null, error: null };
+}
+
+export async function handleDemoGenerateResponse(
+  query: string,
+): Promise<
+  Response<{
+    response: string;
+    sources?: Tables<"note">[];
+  }>
+> {
+  const DEMO_DASHBOARD_ID = "518ff0b2-2db0-4d11-9306-6325ea4a31ee";
+  const openAIService = new OpenAIService();
+  const noteService = new SupabaseService<Tables<"note">>(TABLES.note);
+  const queryVector = await openAIService.generateEmbedding(query, "text-embedding-3-large");
+  const similarNotes: Tables<"note">[] = await noteService.getSimilarVector(queryVector, "query_note", 5, {
+    dashboard: DEMO_DASHBOARD_ID,
+  });
+  if (similarNotes.length === 0)
+    return {
+      data: {
+        response: "No relevant notes found.",
+        sources: [],
+      },
+      error: null,
+    };
+
+  const refinedNotes = similarNotes.map((note) => ({
+    title: note.title,
+    content: note.content,
+  }));
+
+  const semanticMessages: ChatCompletionParam[] = [
+    {
+      role: "system",
+      content: `
+          ${contextPrompt}
+
+          #ROLE#
+          You are a helpful assistant that provides information about the user's notes.
+
+          #GOAL#
+          Respond to the user's query given the relevant notes.
+
+          #RELEVANT NOTES#
+          ${JSON.stringify(refinedNotes)}
+        `,
+    },
+    {
+      role: "user",
+      content: query,
+    },
+  ];
+  const semanticResponse: string = await openAIService.generateResponse(semanticMessages, "text", "gpt-5");
+
+  const filterResponseMessages: ChatCompletionParam[] = [
+    {
+      role: "system",
+      content: `
+          ${contextPrompt}
+          You need to filter the relevant notes based on the user's query.
+          The notes, to be filtered from, are as follows:
+          ${JSON.stringify(similarNotes)}
+
+          Return the id's of the relevant notes in the following json format:
+          {"notes": [note1id, note2id, ...]}
+        `,
+    },
+    {
+      role: "user",
+      content: `The user's query is: ${query}`,
+    },
+  ];
+  const filterReferenceResponse = await openAIService.generateResponse(
+    filterResponseMessages,
+    "json_object",
+    "gpt-4o-mini",
+  );
+  const filteredReferences = filterReferenceResponse.notes || [];
+  const actualReferences = similarNotes.filter((note) => filteredReferences.includes(note.id));
+
+  return {
+    data: { response: semanticResponse, sources: actualReferences },
+    error: null,
+  };
 }

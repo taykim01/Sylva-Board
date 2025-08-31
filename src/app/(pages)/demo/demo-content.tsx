@@ -10,7 +10,8 @@ import { Tables } from "@/database.types";
 import { BaseNote } from "@/components/base/base-note";
 import { BaseTextEditor, BaseTextEditorProps, BaseTextEditorRef } from "@/components/base/base-text-editor";
 import { forwardRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useSafeTranslation } from "@/hooks/use-safe-translation";
+import { DemoAiChatbot } from "@/components/ai/demo-ai-chatbot";
 
 const DemoTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props, ref) => {
   return <BaseTextEditor {...props} ref={ref} />;
@@ -36,7 +37,7 @@ function DemoNote(props: { data: Tables<"note"> }) {
 }
 
 export function DemoContent() {
-  const { t } = useTranslation('common');
+  const { t } = useSafeTranslation('common');
   const {
     notes,
     viewMode,
@@ -78,6 +79,7 @@ export function DemoContent() {
         debounceUpdate={debounceUpdate}
       />
       <BaseBottomBar onCreateNote={createNote} />
+      <DemoAiChatbot />
     </BaseContainer>
   );
 }
