@@ -1,9 +1,11 @@
 "use client";
 
-import { Position, ReactFlow } from "@xyflow/react";
+import { Position, ReactFlow, ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useBoardState } from "@/hooks/use-board-state";
 import { Tables } from "@/database.types";
+import { BaseBottomBar } from "./base-bottom-bar";
+import { useCallback } from "react";
 
 interface BaseBoardProps {
   notes: Tables<"note">[] | null;
@@ -16,6 +18,7 @@ interface BaseBoardProps {
     targetHandle: Position,
   ) => Promise<void>;
   onDeleteEdge: (id: string) => Promise<void>;
+  onCreateNote: (position: { x: number; y: number }) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   nodeComponent: React.ComponentType<any>;
 }
@@ -24,7 +27,15 @@ const defaultEdgeOptions = {
   style: { strokeWidth: 1.5, stroke: "#D0D5DD" },
 };
 
-export function BaseBoard({ notes, edges, onMoveNote, onCreateEdge, onDeleteEdge, nodeComponent }: BaseBoardProps) {
+function BoardContent({
+  notes,
+  edges,
+  onMoveNote,
+  onCreateEdge,
+  onDeleteEdge,
+  nodeComponent,
+  onCreateNote,
+}: BaseBoardProps) {
   const {
     nodes,
     flowEdges,
@@ -42,13 +53,25 @@ export function BaseBoard({ notes, edges, onMoveNote, onCreateEdge, onDeleteEdge
     onCreateEdge,
     onDeleteEdge,
   });
+  const { screenToFlowPosition } = useReactFlow();
+
+  const handleCreateNote = useCallback(async () => {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const flowPosition = screenToFlowPosition({ x: centerX, y: centerY });
+    const position = {
+      x: flowPosition.x - 120,
+      y: flowPosition.y - 120,
+    };
+    await onCreateNote(position);
+  }, [onCreateNote, screenToFlowPosition]);
 
   if (!mounted) {
     return <div style={{ width: "100%" }} className="h-[calc(100vh-40px)]" />;
   }
 
   return (
-    <div style={{ width: "100%" }} className="h-[calc(100vh-40px)]">
+    <div style={{ width: "100%" }} className="h-[calc(100vh-40px)] relative">
       <ReactFlow
         style={{
           backgroundColor: "#FAFAFA",
@@ -74,6 +97,15 @@ export function BaseBoard({ notes, edges, onMoveNote, onCreateEdge, onDeleteEdge
         maxZoom={4}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       />
+      <BaseBottomBar onCreateNote={handleCreateNote} />
     </div>
+  );
+}
+
+export function BaseBoard(props: BaseBoardProps) {
+  return (
+    <ReactFlowProvider>
+      <BoardContent {...props} />
+    </ReactFlowProvider>
   );
 }

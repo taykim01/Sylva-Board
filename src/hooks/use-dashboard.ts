@@ -35,14 +35,18 @@ export function useDashboard() {
   const router = useRouter();
   const { settings, _setSettings } = useSettingsStore();
 
-  const createNote = async () => {
+  const [newNoteId, setNewNoteId] = useState<string | null>(null);
+
+  const createNote = async (position?: { x: number; y: number }) => {
     setLoading(true);
     try {
       const dashboardId = currentDashboard?.id;
       if (!dashboardId) throw new Error("No current dashboard selected");
-      const { data, error } = await handleCreateEmptyNote(dashboardId);
+      const { data, error } = await handleCreateEmptyNote(dashboardId, position);
       if (error) throw error;
       _addNote(data!);
+      setNewNoteId(data!.id);
+      setTimeout(() => setNewNoteId(null), 1000); // Highlight for 1 second
     } catch (error) {
       setError(error as string);
     } finally {
@@ -120,7 +124,9 @@ export function useDashboard() {
   const currentNote = notes?.find((note) => note.id === noteId);
 
   const toggleViewMode = async () => {
-    const {data: newSettings} = await updateSettings(settings.id, { view: settings.view === "board" ? "list" : "board" });
+    const { data: newSettings } = await updateSettings(settings.id, {
+      view: settings.view === "board" ? "list" : "board",
+    });
     _setSettings(newSettings!);
   };
 
@@ -193,5 +199,6 @@ export function useDashboard() {
     _setCurrentDashboard,
     _setDashboards,
     _addDashboard,
+    newNoteId,
   };
 }

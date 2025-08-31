@@ -100,12 +100,16 @@ export function useDemo() {
     }
   };
 
-  const createNote = async () => {
+  const [newNoteId, setNewNoteId] = useState<string | null>(null);
+
+  const createNote = async (position?: { x: number; y: number }) => {
     setLoading(true);
     try {
-      const { data, error } = await handleDemoCreateEmptyNote();
+      const { data, error } = await handleDemoCreateEmptyNote(position);
       if (error) throw error;
       _addNote(data!);
+      setNewNoteId(data!.id);
+      setTimeout(() => setNewNoteId(null), 1000); // Highlight for 1 second
     } catch (error) {
       setError(error as string);
     } finally {
@@ -220,5 +224,6 @@ export function useDemo() {
     updateEdge,
     deleteEdge,
     readEdges,
+    newNoteId,
   };
 }

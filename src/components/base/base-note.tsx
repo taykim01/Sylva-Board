@@ -60,6 +60,7 @@ type BaseNoteProps = {
   dashboards?: Tables<"dashboard">[];
   currentDashboard?: Tables<"dashboard"> | null;
   onReassignNote?: (noteId: string, dashboardId: string) => Promise<void>;
+  isNew?: boolean;
 };
 
 export function BaseNote({
@@ -75,12 +76,13 @@ export function BaseNote({
   dashboards = [],
   currentDashboard,
   onReassignNote,
+  isNew,
 }: BaseNoteProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [title, setTitle] = useState(note.title);
   const [localColor, setLocalColor] = useState(note.color || "#f8fafc");
   const editorRef = useRef<{ editor: { commands: { focus: () => void } } }>(null);
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
 
   const dateToLocaleString = new Date(note.created_at).toLocaleString("en-US", {
     dateStyle: "short",
@@ -121,7 +123,9 @@ export function BaseNote({
       onClick={() => selectNote(note.id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="flex-shrink-0 w-full sm:w-[240px] h-[240px] border-t-4 p-3 pb-4 cursor-pointer shadow relative"
+      className={`flex-shrink-0 w-full sm:w-[240px] h-[240px] border-t-4 p-3 pb-4 cursor-pointer shadow relative transition-all duration-500 ${
+        isNew ? "animate-pulse-and-glow" : ""
+      }`}
       style={{ backgroundColor: localColor, borderTopColor: getContrastingColor(localColor) }}
     >
       {handle && <Handles note={{ ...note, color: localColor }} isHovered={isHovered} createEdge={createEdge} />}
@@ -152,7 +156,7 @@ export function BaseNote({
               {onReassignNote && dashboards.length > 1 && (
                 <DropdownMenuItem asChild>
                   <div className="flex items-center justify-between w-full">
-                    <span>{t('notes.moveToDashboard')}</span>
+                    <span>{t("notes.moveToDashboard")}</span>
                     <NoteDashboardReassign
                       note={note}
                       dashboards={dashboards}
@@ -164,7 +168,7 @@ export function BaseNote({
               )}
               <DropdownMenuItem asChild>
                 <div className="flex flex-col gap-2 items-start">
-                  <span className="text-xs text-slate-500 mb-1 text-left">{t('notes.changeColor')}</span>
+                  <span className="text-xs text-slate-500 mb-1 text-left">{t("notes.changeColor")}</span>
                   <div className="flex flex-wrap gap-1">
                     {NOTE_COLORS.map((color) => (
                       <button
@@ -197,7 +201,7 @@ export function BaseNote({
         <div className="flex flex-col gap-3 h-full nowheel overflow-scroll no-scrollbar">
           <input
             className="text-b18 text-slate-800 outline-none w-full polymath"
-            placeholder={t('notes.newNote')}
+            placeholder={t("notes.newNote")}
             value={title || ""}
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}

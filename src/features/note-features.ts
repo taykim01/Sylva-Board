@@ -6,7 +6,10 @@ import { handleGetUser } from "./auth-features";
 import { Response } from "@/core/types";
 import { EMBEDDING_MODEL, openai } from "@/infrastructures/openai";
 
-export async function handleCreateEmptyNote(dashboardId: string): Promise<Response<Tables<"note">>> {
+export async function handleCreateEmptyNote(
+  dashboardId: string,
+  position?: { x: number; y: number },
+): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
   const { error } = await handleGetUser();
   if (error) {
@@ -17,8 +20,8 @@ export async function handleCreateEmptyNote(dashboardId: string): Promise<Respon
   const newNote: Omit<Tables<"note">, "id" | "created_at"> = {
     title: "",
     content: "",
-    x: 0,
-    y: 0,
+    x: position?.x ?? 0,
+    y: position?.y ?? 0,
     color: "#ffffff",
     embedding: null,
     shareable: false,
@@ -43,7 +46,7 @@ export async function handleGetMyNotes(dashboardId?: string): Promise<Response<T
 
   if (!dashboardId) {
     const userId = data?.id;
-    if(!userId) throw new Error("User not found");
+    if (!userId) throw new Error("User not found");
 
     const myDashboards = await supabase.from("dashboard").select("*").eq("user_id", userId);
     if (myDashboards.error) {

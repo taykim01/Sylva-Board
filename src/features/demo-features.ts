@@ -9,14 +9,17 @@ import OpenAIService, { ChatCompletionParam } from "@/services/openai.service";
 import SupabaseService from "@/services/supabase.service";
 import TABLES from "@/infrastructures/supabase/tables";
 
-export async function handleDemoCreateEmptyNote(): Promise<Response<Tables<"note">>> {
+export async function handleDemoCreateEmptyNote(position?: {
+  x: number;
+  y: number;
+}): Promise<Response<Tables<"note">>> {
   const supabase = await createClient();
   const newNote: Omit<Tables<"note">, "id" | "created_at"> = {
     dashboard_id: "518ff0b2-2db0-4d11-9306-6325ea4a31ee",
     title: "",
     content: "",
-    x: 0,
-    y: 0,
+    x: position?.x ?? 0,
+    y: position?.y ?? 0,
     color: "#ffffff",
     embedding: null,
     shareable: false,
@@ -137,9 +140,7 @@ export async function handleDemoDeleteEdge(id: string) {
   return { data: null, error: null };
 }
 
-export async function handleDemoGenerateResponse(
-  query: string,
-): Promise<
+export async function handleDemoGenerateResponse(query: string): Promise<
   Response<{
     response: string;
     sources?: Tables<"note">[];

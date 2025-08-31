@@ -19,7 +19,7 @@ const DemoTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((props
 
 DemoTextEditor.displayName = "DemoTextEditor";
 
-function DemoNote(props: { data: Tables<"note"> }) {
+function DemoNote(props: { data: Tables<"note">; isNew: boolean }) {
   const { notes, selectNote, deleteNote, debounceUpdate, createEdge, currentNote, viewMode } = useDemo();
   return (
     <BaseNote
@@ -32,12 +32,13 @@ function DemoNote(props: { data: Tables<"note"> }) {
       textEditorComponent={DemoTextEditor}
       notes={notes}
       currentNote={currentNote}
+      isNew={props.isNew}
     />
   );
 }
 
 export function DemoContent() {
-  const { t } = useSafeTranslation('common');
+  const { t } = useSafeTranslation("common");
   const {
     notes,
     viewMode,
@@ -51,13 +52,23 @@ export function DemoContent() {
     createEdge,
     deleteEdge,
     debounceUpdate,
+    newNoteId,
   } = useDemo();
+
+  const handleCreateNote = async (position: { x: number; y: number }) => {
+    await createNote(position);
+  };
+
+  const DemoNoteWithProps = (props: { data: Tables<"note"> }) => (
+    <DemoNote data={props.data} isNew={props.data.id === newNoteId} />
+  );
+
   return (
     <BaseContainer
       className="relative"
       viewMode={viewMode ?? "board"}
       onToggleViewMode={toggleViewMode}
-      accountName={t('demo.demoAccount')}
+      accountName={t("demo.demoAccount")}
       showTryButton
     >
       <BaseBoard
@@ -66,9 +77,10 @@ export function DemoContent() {
         onMoveNote={moveNote}
         onCreateEdge={createEdge}
         onDeleteEdge={deleteEdge}
-        nodeComponent={DemoNote}
+        nodeComponent={DemoNoteWithProps}
+        onCreateNote={handleCreateNote}
       />
-      <BaseList notes={notes} viewMode={viewMode} noteComponent={DemoNote} />
+      <BaseList notes={notes} viewMode={viewMode} noteComponent={DemoNoteWithProps} />
       <BaseSideDrawer
         currentNote={currentNote || null}
         onDeleteNote={deleteNote}
@@ -78,7 +90,6 @@ export function DemoContent() {
         notes={notes}
         debounceUpdate={debounceUpdate}
       />
-      <BaseBottomBar onCreateNote={createNote} />
       <DemoAiChatbot />
     </BaseContainer>
   );

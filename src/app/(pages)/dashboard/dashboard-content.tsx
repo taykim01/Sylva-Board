@@ -20,11 +20,12 @@ const DashboardTextEditor = forwardRef<BaseTextEditorRef, BaseTextEditorProps>((
 
 DashboardTextEditor.displayName = "DashboardTextEditor";
 
-function DashboardNote(props: { 
+function DashboardNote(props: {
   data: Tables<"note">;
   dashboards?: Tables<"dashboard">[];
   currentDashboard?: Tables<"dashboard"> | null;
   onReassignNote?: (noteId: string, dashboardId: string) => Promise<void>;
+  isNew: boolean;
 }) {
   const { notes, selectNote, deleteNote, debounceUpdate, createEdge, currentNote, viewMode } = useDashboard();
   return (
@@ -41,6 +42,7 @@ function DashboardNote(props: {
       dashboards={props.dashboards}
       currentDashboard={props.currentDashboard}
       onReassignNote={props.onReassignNote}
+      isNew={props.isNew}
     />
   );
 }
@@ -64,17 +66,14 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
     dashboards,
     _setCurrentDashboard,
     _addDashboard,
+    newNoteId,
   } = useDashboard();
-  
-  const {
-    createDashboard,
-    reassignNote,
-    loading: dashboardLoading,
-  } = useDashboardManager();
 
-  const handleCreateNote = async () => {
+  const { createDashboard, reassignNote, loading: dashboardLoading } = useDashboardManager();
+
+  const handleCreateNote = async (position: { x: number; y: number }) => {
     sendGAEvent("create_note");
-    await createNote();
+    await createNote(position);
   };
 
   const handleDashboardSelect = (dashboard: Tables<"dashboard">) => {
@@ -99,6 +98,7 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
       dashboards={dashboards}
       currentDashboard={currentDashboard}
       onReassignNote={handleReassignNote}
+      isNew={props.data.id === newNoteId}
     />
   );
 
@@ -122,6 +122,7 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
         onCreateEdge={createEdge}
         onDeleteEdge={deleteEdge}
         nodeComponent={DashboardNoteWithProps}
+        onCreateNote={handleCreateNote}
       />
       <BaseList notes={notes} viewMode={viewMode as "board" | "list"} noteComponent={DashboardNoteWithProps} />
       <BaseSideDrawer
@@ -133,7 +134,6 @@ export function DashboardContent({ userEmail }: { userEmail: string }) {
         notes={notes}
         debounceUpdate={debounceUpdate}
       />
-      <BaseBottomBar onCreateNote={handleCreateNote} />
       {user?.id && <AiChatbot />}
     </BaseContainer>
   );
