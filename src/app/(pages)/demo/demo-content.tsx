@@ -3,7 +3,6 @@
 import { BaseContainer } from "@/components/base/base-container";
 import { BaseBoard } from "@/components/base/base-board";
 import { BaseList } from "@/components/base/base-list";
-import { BaseBottomBar } from "@/components/base/base-bottom-bar";
 import { BaseSideDrawer } from "@/components/base/base-side-drawer";
 import { useDemo } from "@/hooks/use-demo";
 import { Tables } from "@/database.types";
