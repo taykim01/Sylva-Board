@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+// @ts-ignore TS2882
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { I18nProvider } from "@/components/providers/i18n-provider";
@@ -27,6 +28,11 @@ export const metadata: Metadata = {
     title: "Sylva Board",
     description: "Personal Bulletin Board",
   },
+  formatDetection: {
+    telephone: false,
+    date: false as unknown as boolean,
+    address: false,
+  }
 };
 
 const pretendard = localFont({
